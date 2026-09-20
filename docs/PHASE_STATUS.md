@@ -1,10 +1,21 @@
 # ORION Phase Status & Exit Gates
 
-## Current Phase: Phase 2 — Module A: Phishing, URL & Message Engine
+## Current Phase: Phase 3 — Module C: Authentication Anomaly & ATO Engine
 - **Date Started**: 2026-09-20
-- **Status**: READY TO START (Phase 1 PASSED)
-- **Previous Gate**: Phase 1 Core Intelligence Gate (PASSED on 2026-09-20)
-- **Current Gate**: Phase 2 Phishing Engine Gate
+- **Status**: READY TO START (Phase 2 PASSED)
+- **Previous Gate**: Phase 2 Phishing Engine Gate (PASSED on 2026-09-20)
+- **Current Gate**: Phase 3 Authentication Engine Gate
+
+---
+
+## Phase 2 Phishing Engine Verification Record (PASSED)
+- [x] Implemented `url_parser.py` (offline boolean indicators, no network fetches).
+- [x] Implemented `email_parser.py` (authentication headers and mismatch detection).
+- [x] Implemented `html_parser.py` (HTML form and mismatched link extraction).
+- [x] Implemented `text_classifier.py` and `url_classifier.py` (Pre-fitted scikit-learn models for inference).
+- [x] Coordinated via `engine.py` (Phishing Engine) for dual-mode calibrated probabilities.
+- [x] Added `POST /api/analyze/phishing` endpoint and verified it handles A0, A1, A2 accurately.
+- [x] Maintained 100% test pass rate with deterministic outcomes.
 
 ---
 
@@ -37,8 +48,8 @@
 |---|---|---|---|---|
 | **Phase 0** | Foundation, Config v1.1, ADRs, Scaffolding | **PASSED** | Clean start from clone, health endpoints, DB WAL | **2026-09-20** |
 | **Phase 1** | Contract v1.2, Pydantic Models, Orchestrator, Fixtures | **PASSED** | Mocked analysis end-to-end incident + alerts | **2026-09-20** |
-| **Phase 2** | Module A: Phishing, URL & Message Engine | **READY** | A0–A2 pass, static analysis only, eval split | — |
-| **Phase 3** | Module C: Authentication Anomaly & ATO Engine | PENDING | B0–B4 pass, spraying & baseline anomaly | — |
+| **Phase 2** | Module A: Phishing, URL & Message Engine | **PASSED** | A0–A2 pass, static analysis only, eval split | **2026-09-20** |
+| **Phase 3** | Module C: Authentication Anomaly & ATO Engine | **READY** | B0–B4 pass, spraying & baseline anomaly | — |
 | **Phase 4** | Module B & D: Impersonation, Media Forensics, System | PENDING | C1–C2, E1, D1 pass, ELA heatmap, fallback | — |
 | **Phase 5** | SOC Dashboard, Entity Graph, Simulated Playbooks | PENDING | Unified constellation storyline, all widgets | — |
 | **Phase 6** | Evaluation, Benchmarks, Hardening & Rehearsal | PENDING | Full clean rehearsal, metrics.json, freeze | — |
