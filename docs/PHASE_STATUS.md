@@ -1,10 +1,19 @@
 # ORION Phase Status & Exit Gates
 
-## Current Phase: Phase 3 — Module C: Authentication Anomaly & ATO Engine
+## Current Phase: Phase 4 — Module B & D: Impersonation, Media Forensics, System
 - **Date Started**: 2026-09-20
-- **Status**: READY TO START (Phase 2 PASSED)
-- **Previous Gate**: Phase 2 Phishing Engine Gate (PASSED on 2026-09-20)
-- **Current Gate**: Phase 3 Authentication Engine Gate
+- **Status**: READY TO START (Phase 3 PASSED)
+- **Previous Gate**: Phase 3 Authentication Engine Gate (PASSED on 2026-09-20)
+- **Current Gate**: Phase 4 Impersonation, Media & System Engine Gate
+
+---
+
+## Phase 3 Authentication Engine Verification Record (PASSED)
+- [x] Implemented `models.py` schema for `AuthEvent`.
+- [x] Created `baselines.py` for deterministic mock user history (known IPs, usual hours).
+- [x] Implemented `rules_engine.py` for all key indicators: `failed_burst`, `password_spraying`, `impossible_travel`, etc.
+- [x] Delivered `ml_model.py` containing a pre-fitted synthetic `IsolationForest` to calculate normalized anomaly scores (`P`).
+- [x] Added `POST /api/analyze/authentication` endpoint and successfully tested integration with golden cases (B0-B4).
 
 ---
 
@@ -49,7 +58,7 @@
 | **Phase 0** | Foundation, Config v1.1, ADRs, Scaffolding | **PASSED** | Clean start from clone, health endpoints, DB WAL | **2026-09-20** |
 | **Phase 1** | Contract v1.2, Pydantic Models, Orchestrator, Fixtures | **PASSED** | Mocked analysis end-to-end incident + alerts | **2026-09-20** |
 | **Phase 2** | Module A: Phishing, URL & Message Engine | **PASSED** | A0–A2 pass, static analysis only, eval split | **2026-09-20** |
-| **Phase 3** | Module C: Authentication Anomaly & ATO Engine | **READY** | B0–B4 pass, spraying & baseline anomaly | — |
-| **Phase 4** | Module B & D: Impersonation, Media Forensics, System | PENDING | C1–C2, E1, D1 pass, ELA heatmap, fallback | — |
+| **Phase 3** | Module C: Authentication Anomaly & ATO Engine | **PASSED** | B0–B4 pass, spraying & baseline anomaly | **2026-09-20** |
+| **Phase 4** | Module B & D: Impersonation, Media Forensics, System | **READY** | C1–C2, E1, D1 pass, ELA heatmap, fallback | — |
 | **Phase 5** | SOC Dashboard, Entity Graph, Simulated Playbooks | PENDING | Unified constellation storyline, all widgets | — |
 | **Phase 6** | Evaluation, Benchmarks, Hardening & Rehearsal | PENDING | Full clean rehearsal, metrics.json, freeze | — |
