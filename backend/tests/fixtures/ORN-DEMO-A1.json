@@ -1,0 +1,122 @@
+{
+  "incident_id": "ORN-DEMO-A1",
+  "schema_version": "1.2",
+  "timestamp": "2026-09-20T07:46:07.439466",
+  "event_time": "2026-09-20T07:46:07.439466",
+  "module": "phishing",
+  "layer": "human",
+  "input_type": "url_text",
+  "threat_type": "credential_harvesting",
+  "assessment": "threat",
+  "severity": "CRITICAL",
+  "risk_score": 97,
+  "confidence": 0.915,
+  "status": "new",
+  "correlation_id": null,
+  "entities": [
+    {
+      "entity_type": "domain",
+      "value_canonical": "192.168.1.100",
+      "role": "subject",
+      "criticality": "standard"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "EV-ORN-DEMO-A1-0",
+      "type": "ip_host",
+      "category": "system",
+      "value": "mocked",
+      "weight": 0.55,
+      "direction": "supports_threat",
+      "source_engine": "mocked_detector",
+      "description": "Mocked evidence for ip_host",
+      "contribution": 18.03,
+      "contribution_pct": 42.3
+    },
+    {
+      "evidence_id": "EV-ORN-DEMO-A1-1",
+      "type": "credential_path",
+      "category": "system",
+      "value": "mocked",
+      "weight": 0.4,
+      "direction": "supports_threat",
+      "source_engine": "mocked_detector",
+      "description": "Mocked evidence for credential_path",
+      "contribution": 9.83,
+      "contribution_pct": 23.1
+    },
+    {
+      "evidence_id": "EV-ORN-DEMO-A1-2",
+      "type": "brand_lookalike",
+      "category": "system",
+      "value": "mocked",
+      "weight": 0.5,
+      "direction": "supports_threat",
+      "source_engine": "mocked_detector",
+      "description": "Mocked evidence for brand_lookalike",
+      "contribution": 14.75,
+      "contribution_pct": 34.6
+    }
+  ],
+  "risk_breakdown": {
+    "p": 0.95,
+    "e": 0.865,
+    "c": 0.915,
+    "f": 0.89,
+    "raw": 97.23249999999999,
+    "assessment_reason": "Impact: HIGH. Floors: F3_phish_ip_cred_lookalike. Caps: None.",
+    "inconclusive_overridden_by_floor": false
+  },
+  "explanation": {
+    "factors": [
+      {
+        "evidence_ids": [
+          "EV-ORN-DEMO-A1-0"
+        ],
+        "description": "URL uses an IP address instead of a domain name."
+      },
+      {
+        "evidence_ids": [
+          "EV-ORN-DEMO-A1-2"
+        ],
+        "description": "Domain name visually resembles a known brand."
+      },
+      {
+        "evidence_ids": [
+          "EV-ORN-DEMO-A1-1"
+        ],
+        "description": "URL path contains keywords typically associated with credential harvesting (e.g., 'login', 'secure')."
+      }
+    ],
+    "top_factors": [
+      "EV-ORN-DEMO-A1-0",
+      "EV-ORN-DEMO-A1-2",
+      "EV-ORN-DEMO-A1-1"
+    ],
+    "ml_insight": null
+  },
+  "recommended_actions": [
+    {
+      "action": "Block URL at gateway",
+      "priority": 1,
+      "rationale": "Prevent users from accessing the malicious URL.",
+      "automated": false,
+      "status": "suggested",
+      "simulated_at": null
+    },
+    {
+      "action": "Escalate to SOC Tier 3",
+      "priority": 1,
+      "rationale": "Critical severity requires immediate expert analysis.",
+      "automated": false,
+      "status": "suggested",
+      "simulated_at": null
+    }
+  ],
+  "mitre_attack": null,
+  "authenticity": null,
+  "model_metadata": {
+    "risk_config_version": "risk-cfg-1.1"
+  }
+}

@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 
 from backend.app.core.config import get_risk_config, risk_config_loader
 from backend.app.core.database import check_db_health, init_db
-
+from backend.app.api.endpoints.incidents import router as incidents_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,6 +30,8 @@ app = FastAPI(
     version="1.2.0",
     lifespan=lifespan,
 )
+
+app.include_router(incidents_router, prefix="/api/incidents", tags=["Incidents"])
 
 # CORS configuration
 app.add_middleware(
