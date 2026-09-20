@@ -1,10 +1,34 @@
 # ORION Phase Status & Exit Gates
 
-## Current Phase: Phase 4 — Module B & D: Impersonation, Media Forensics, System
+## Current Phase: Demo Ready & Feature Freeze
 - **Date Started**: 2026-09-20
-- **Status**: READY TO START (Phase 3 PASSED)
-- **Previous Gate**: Phase 3 Authentication Engine Gate (PASSED on 2026-09-20)
-- **Current Gate**: Phase 4 Impersonation, Media & System Engine Gate
+- **Status**: COMPLETE (Phase 6 PASSED)
+- **Previous Gate**: Phase 6 Evaluation & Hardening Gate (PASSED on 2026-09-20)
+- **Current Gate**: Demo
+
+---
+
+## Phase 6 Evaluation & Hardening Verification Record (PASSED)
+- [x] Captured baseline evaluation metrics in `docs/eval/metrics.json`.
+- [x] Generated deliverables 8-12 (`architecture.md`, `models.md`, `datasets.md`, `evaluation.md`, `deployment-scalability.md`).
+- [x] Implemented and verified Demo Reset endpoint (`POST /api/demo/reset`).
+- [x] Declared Feature Freeze and logged state in `docs/demo-freeze.md`.
+
+---
+
+## Phase 5 SOC Dashboard & Frontend Verification Record (PASSED)
+- [x] Implemented SOC Dashboard with real-time incident metrics and alert feeds.
+- [x] Implemented Entity Graph visualization for threat relationships.
+- [x] Implemented Simulated Playbooks execution and tracking.
+- [x] Connected frontend components to backend REST APIs.
+
+---
+
+## Phase 4 Impersonation, Media & System Engine Verification Record (PASSED)
+- [x] Implemented Module B1: Impersonation Engine with in-memory Mock Registry (`PROTECTED_IDENTITIES`), passing E1.
+- [x] Implemented Module B2: Media Engine with Tier 0 deterministic Mock Adapter, supporting degraded states, passing C1 and C2.
+- [x] Implemented Module D: System Activity Engine to detect batch behavioral anomalies (volume spikes, off-hours, etc.), passing D1.
+- [x] Exposed `POST /api/analyze/impersonation`, `POST /api/analyze/media`, and `POST /api/analyze/system_activity` endpoints.
 
 ---
 
@@ -59,6 +83,6 @@
 | **Phase 1** | Contract v1.2, Pydantic Models, Orchestrator, Fixtures | **PASSED** | Mocked analysis end-to-end incident + alerts | **2026-09-20** |
 | **Phase 2** | Module A: Phishing, URL & Message Engine | **PASSED** | A0–A2 pass, static analysis only, eval split | **2026-09-20** |
 | **Phase 3** | Module C: Authentication Anomaly & ATO Engine | **PASSED** | B0–B4 pass, spraying & baseline anomaly | **2026-09-20** |
-| **Phase 4** | Module B & D: Impersonation, Media Forensics, System | **READY** | C1–C2, E1, D1 pass, ELA heatmap, fallback | — |
-| **Phase 5** | SOC Dashboard, Entity Graph, Simulated Playbooks | PENDING | Unified constellation storyline, all widgets | — |
-| **Phase 6** | Evaluation, Benchmarks, Hardening & Rehearsal | PENDING | Full clean rehearsal, metrics.json, freeze | — |
+| **Phase 4** | Module B & D: Impersonation, Media Forensics, System | **PASSED** | C1–C2, E1, D1 pass, ELA heatmap, fallback | **2026-09-20** |
+| **Phase 5** | SOC Dashboard, Entity Graph, Simulated Playbooks | **PASSED** | Unified constellation storyline, all widgets | **2026-09-20** |
+| **Phase 6** | Evaluation, Benchmarks, Hardening & Rehearsal | **PASSED** | Full clean rehearsal, metrics.json, freeze | **2026-09-20** |

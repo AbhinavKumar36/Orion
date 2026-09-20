@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Dict, Any
 import sqlite3
 from backend.app.models.domain import Incident, Evidence, Entity
 from backend.app.core.database import get_db
@@ -172,3 +172,96 @@ class IncidentRepository:
                 evidence=evidence,
                 entities=entities
             )
+
+    def list_incidents(self, limit: int = 50, offset: int = 0) -> List[Dict[str, Any]]:
+        with get_db() as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("SELECT incident_id, timestamp, module, threat_type, assessment, severity, status FROM incidents ORDER BY timestamp DESC LIMIT ? OFFSET ?", (limit, offset)).fetchall()
+            return [dict(r) for r in rows]
+
+    def update_action_status(self, incident_id: str, action_name: str, new_status: str, simulated_at: str) -> bool:
+        with get_db() as conn:
+            row = conn.execute("SELECT recommended_actions_json FROM incidents WHERE incident_id = ?", (incident_id,)).fetchone()
+            if not row:
+                return False
+            actions = json.loads(row[0])
+            updated = False
+            for action in actions:
+                if action.get("action") == action_name:
+                    action["status"] = new_status
+                    if new_status == "simulated":
+                        action["simulated_at"] = simulated_at
+                    updated = True
+                    break
+            
+            if updated:
+                conn.execute("UPDATE incidents SET recommended_actions_json = ? WHERE incident_id = ?", (json.dumps(actions), incident_id))
+                return True
+            return False
+
+    def get_dashboard_metrics(self) -> Dict[str, Any]:
+        with get_db() as conn:
+            conn.row_factory = sqlite3.Row
+            total_events = conn.execute("SELECT COUNT(*) FROM incidents").fetchone()[0]
+            
+            # Threats detected: assessment='threat' and severity != 'LOW' (meaning MEDIUM, HIGH, CRITICAL)
+            threats_detected = conn.execute("SELECT COUNT(*) FROM incidents WHERE assessment = 'threat' AND severity IN ('MEDIUM', 'HIGH', 'CRITICAL')").fetchone()[0]
+            
+            # Category counts
+            cat_rows = conn.execute("SELECT threat_type, COUNT(*) as c FROM incidents WHERE assessment = 'threat' GROUP BY threat_type").fetchall()
+            categories = {r["threat_type"]: r["c"] for r in cat_rows}
+            
+            # Severity counts
+            sev_rows = conn.execute("SELECT severity, COUNT(*) as c FROM incidents GROUP BY severity").fetchall()
+            severities = {r["severity"]: r["c"] for r in sev_rows}
+            
+            # Module counts for threats
+            mod_rows = conn.execute("SELECT module, COUNT(*) as c FROM incidents WHERE assessment = 'threat' GROUP BY module").fetchall()
+            modules = {r["module"]: r["c"] for r in mod_rows}
+            
+            # Layer split
+            layer_rows = conn.execute("SELECT layer, COUNT(*) as c FROM incidents GROUP BY layer").fetchall()
+            layers = {r["layer"]: r["c"] for r in layer_rows}
+            
+            # Status
+            status_rows = conn.execute("SELECT status, COUNT(*) as c FROM incidents GROUP BY status").fetchall()
+            statuses = {r["status"]: r["c"] for r in status_rows}
+            
+            # Active
+            active = conn.execute("SELECT COUNT(*) FROM incidents WHERE status IN ('new', 'triaged', 'investigating') AND severity IN ('MEDIUM', 'HIGH', 'CRITICAL')").fetchone()[0]
+            
+            # Inconclusive
+            inconclusive = conn.execute("SELECT COUNT(*) FROM incidents WHERE assessment = 'inconclusive'").fetchone()[0]
+            
+            return {
+                "total_events": total_events,
+                "threats_detected": threats_detected,
+                "categories": categories,
+                "severities": severities,
+                "modules": modules,
+                "layers": layers,
+                "statuses": statuses,
+                "active_incidents": active,
+                "inconclusive": inconclusive
+            }
+
+    def get_dashboard_timeline(self) -> List[Dict[str, Any]]:
+        with get_db() as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("SELECT incident_id, timestamp, module, severity, correlation_id FROM incidents ORDER BY timestamp ASC LIMIT 100").fetchall()
+            return [dict(r) for r in rows]
+
+    def get_dashboard_targets(self) -> List[Dict[str, Any]]:
+        with get_db() as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute('''
+                SELECT e.value_canonical, e.entity_type, COUNT(ie.incident_id) as count
+                FROM entities e
+                JOIN incident_entities ie ON e.entity_pk = ie.entity_pk
+                WHERE ie.role IN ('target', 'subject')
+                GROUP BY e.entity_pk
+                ORDER BY count DESC
+                LIMIT 10
+            ''').fetchall()
+            return [dict(r) for r in rows]
+

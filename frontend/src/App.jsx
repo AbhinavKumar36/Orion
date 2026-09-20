@@ -19,8 +19,15 @@ import {
   Crosshair,
 } from 'lucide-react';
 
+import OverviewTab from './components/OverviewTab';
+import AnalyzeTab from './components/AnalyzeTab';
+import IncidentsTab from './components/IncidentsTab';
+import IncidentDetail from './components/IncidentDetail';
+import ThreatIntelTab from './components/ThreatIntelTab';
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [activeIncidentId, setActiveIncidentId] = useState(null);
   const [health, setHealth] = useState(null);
   const [systemInfo, setSystemInfo] = useState(null);
   const [latency, setLatency] = useState(null);
@@ -139,7 +146,12 @@ export default function App() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                      setActiveTab(item.id);
+                      if (item.id !== 'incidentDetail') {
+                          setActiveIncidentId(null);
+                      }
+                  }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
                     isActive
                       ? 'bg-primary/10 text-primary border border-primary/30 shadow-[0_0_12px_rgba(0,242,254,0.15)]'
@@ -181,116 +193,13 @@ export default function App() {
 
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              {/* Welcome Banner */}
-              <div className="glass-panel p-6 rounded-xl border border-primary/20 bg-gradient-to-r from-surface via-card to-surface relative overflow-hidden">
-                <div className="relative z-10 max-w-3xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-primary/10 text-primary border border-primary/30">
-                      BPUT Hackathon PS09: CYBERGUARD
-                    </span>
-                    <span className="text-xs text-slate-400">Phase 0 Baseline Active</span>
-                  </div>
-                  <h1 className="text-2xl font-bold text-white mb-2">
-                    Autonomous Multi-Source Cyber Threat Intelligence
-                  </h1>
-                  <p className="text-sm text-slate-300 leading-relaxed">
-                    ORION continuously fuses digital indicators across the Human Layer (phishing, impersonation, synthetic media) and Technology Layer (account takeover, API abuse, exfiltration) into explainable, prioritized incident assessments.
-                  </p>
-                </div>
-              </div>
+          {activeTab === 'overview' && <OverviewTab />}
+          {activeTab === 'analyze' && <AnalyzeTab onIncidentCreated={(id) => { setActiveIncidentId(id); setActiveTab('incidentDetail'); }} />}
+          {activeTab === 'incidents' && <IncidentsTab onViewDetail={(id) => { setActiveIncidentId(id); setActiveTab('incidentDetail'); }} />}
+          {activeTab === 'incidentDetail' && activeIncidentId && <IncidentDetail incidentId={activeIncidentId} onBack={() => { setActiveIncidentId(null); setActiveTab('incidents'); }} />}
+          {activeTab === 'intel' && <ThreatIntelTab />}
 
-              {/* PS09 "F" Command Metrics Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="glass-panel p-4 rounded-xl border border-border glass-panel-hover">
-                  <div className="text-xs font-mono text-slate-400 uppercase mb-1">Total Events Analyzed</div>
-                  <div className="text-3xl font-bold text-white font-mono">1,042</div>
-                  <div className="mt-2 text-[11px] text-emerald-400 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Continuous ingestion active
-                  </div>
-                </div>
-
-                <div className="glass-panel p-4 rounded-xl border border-border glass-panel-hover">
-                  <div className="text-xs font-mono text-slate-400 uppercase mb-1">Threats Detected</div>
-                  <div className="text-3xl font-bold text-severity-high font-mono">38</div>
-                  <div className="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
-                    <span>Critical: <strong className="text-severity-critical">7</strong></span>
-                    <span>High: <strong className="text-severity-high">16</strong></span>
-                    <span>Med: <strong className="text-severity-medium">15</strong></span>
-                  </div>
-                </div>
-
-                <div className="glass-panel p-4 rounded-xl border border-border glass-panel-hover">
-                  <div className="text-xs font-mono text-slate-400 uppercase mb-1">Human Layer Threats</div>
-                  <div className="text-3xl font-bold text-cyan-400 font-mono">24</div>
-                  <div className="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
-                    <span>Phishing: 14</span>
-                    <span>Impersonation: 6</span>
-                    <span>Media: 4</span>
-                  </div>
-                </div>
-
-                <div className="glass-panel p-4 rounded-xl border border-border glass-panel-hover">
-                  <div className="text-xs font-mono text-slate-400 uppercase mb-1">Technology Layer Threats</div>
-                  <div className="text-3xl font-bold text-emerald-400 font-mono">14</div>
-                  <div className="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
-                    <span>ATO / Spraying: 9</span>
-                    <span>Exfiltration: 5</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Attack Constellation Storyline Card */}
-              <div className="glass-panel p-5 rounded-xl border border-border space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-primary" />
-                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider font-mono">
-                      Correlated Attack Constellation (Demo Storyline)
-                    </h3>
-                  </div>
-                  <span className="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-                    Chain: A1 → B1 → D1
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300">
-                  Shared entity graph correlated 3 cross-module incidents under user <code className="text-primary font-mono">user_1042</code> and external source <code className="text-primary font-mono">198.51.100.23</code>.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-                  <div className="p-3 rounded-lg bg-card/60 border border-severity-critical/30">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-mono text-severity-critical font-semibold">ORN-DEMO-A1</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-severity-critical/20 text-severity-critical">CRITICAL (100)</span>
-                    </div>
-                    <div className="text-xs text-white font-medium">Credential Harvesting Phish</div>
-                    <div className="text-[11px] text-slate-400 mt-1">Lookalike domain targeting user_1042</div>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-card/60 border border-severity-high/30">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-mono text-severity-high font-semibold">ORN-DEMO-B1</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-severity-high/20 text-severity-high">HIGH (78)</span>
-                    </div>
-                    <div className="text-xs text-white font-medium">Account Takeover (ATO)</div>
-                    <div className="text-[11px] text-slate-400 mt-1">Failed burst + success from IP 198.51.100.23</div>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-card/60 border border-severity-high/30">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-mono text-severity-high font-semibold">ORN-DEMO-D1</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-severity-high/20 text-severity-high">HIGH (66)</span>
-                    </div>
-                    <div className="text-xs text-white font-medium">Sensitive Data Exfiltration</div>
-                    <div className="text-[11px] text-slate-400 mt-1">Outbound volume spike to external IP</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab !== 'overview' && (
+          {(!['overview', 'analyze', 'incidents', 'incidentDetail', 'intel'].includes(activeTab)) && (
             <div className="glass-panel p-8 rounded-xl border border-border text-center space-y-3">
               <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary mx-auto">
                 <Terminal className="w-6 h-6" />
