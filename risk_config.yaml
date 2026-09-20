@@ -1,0 +1,286 @@
+# ORION risk configuration
+# Version is stored in Incident.model_metadata.risk_config_version.
+# Prototype calibration file. Freeze during demo week after validation.
+version: risk-cfg-1.1
+
+formula:
+  evidence:
+    method: noisy_or
+    direction: supports_threat_only
+  probability:
+    dual_mode: detector_probability
+    rules_only_multiplier: 0.9
+  confidence:
+    min: 0.2
+    max: 1.0
+    disagreement:
+      dual_mode: absolute_p_minus_e
+      rules_only: 0.15
+    missing_check_penalty: 0.5
+  fusion:
+    evidence_weight: 0.5
+    confidence_weight: 0.5
+  score:
+    raw: "100 * P * F * impact"
+    clamp_min: 0
+    clamp_max: 100
+    rounding: half_up
+
+severity_bands:
+  SAFE: [0, 19]
+  LOW: [20, 39]
+  MEDIUM: [40, 59]
+  HIGH: [60, 79]
+  CRITICAL: [80, 100]
+
+impact_multipliers:
+  LOW: 0.80
+  MEDIUM: 1.00
+  HIGH: 1.15
+  CRITICAL: 1.25
+
+impact_rules:
+  phishing:
+    - level: CRITICAL
+      context: [privileged_recipient]
+    - level: CRITICAL
+      context: [executive_recipient]
+    - level: HIGH
+      context: [finance_or_brand_target]
+    - level: HIGH
+      any_of: [credential_request_text, payment_request_text, credential_path]
+    - level: LOW
+      context: [sandbox_or_test]
+    - level: MEDIUM
+  authentication:
+    - level: CRITICAL
+      context: [privileged_account]
+    - level: HIGH
+      context: [finance_or_pii_role]
+    - level: LOW
+      context: [sandbox_or_test]
+    - level: MEDIUM
+  media:
+    - level: CRITICAL
+      context: [public_authority]
+    - level: HIGH
+      context: [executive_or_official]
+    - level: HIGH
+      any_of: [payment_or_urgent_request_context, lookalike_sender_identity]
+    - level: LOW
+      context: [sandbox_or_test]
+    - level: MEDIUM
+  impersonation:
+    - level: CRITICAL
+      context: [public_authority]
+    - level: HIGH
+      context: [executive_or_official]
+    - level: HIGH
+      any_of: [executive_claim, authority_claim, payment_request_text]
+    - level: LOW
+      context: [sandbox_or_test]
+    - level: MEDIUM
+  system_activity:
+    - level: CRITICAL
+      context: [mission_critical_service]
+    - level: HIGH
+      context: [sensitive_service]
+    - level: HIGH
+      any_of: [bulk_file_access, privileged_action_anomaly]
+    - level: LOW
+      context: [sandbox_or_test]
+    - level: MEDIUM
+
+evidence_weights:
+  phishing:
+    ip_host: 0.55
+    brand_lookalike: 0.50
+    credential_request_text: 0.45
+    payment_request_text: 0.45
+    punycode: 0.45
+    credential_path: 0.40
+    impersonation_language: 0.35
+    urgency_language: 0.30
+    suspicious_port: 0.30
+    excessive_subdomains: 0.25
+    redirect_param: 0.25
+    no_https: 0.20
+    suspicious_tld: 0.20
+    suspicious_cta: 0.20
+    special_char_ratio_high: 0.15
+    long_url: 0.10
+    link_text_mismatch: 0.30
+    fake_login_form: 0.45
+    form_action_cross_domain: 0.40
+    spf_fail: 0.25
+    dkim_fail: 0.25
+    dmarc_fail: 0.30
+    reply_to_mismatch: 0.25
+    first_time_sender: 0.15
+    domain_age_young: 0.35
+    cert_anomaly: 0.30
+    qr_source: 0.20
+    homoglyph_domain: 0.45
+    url_userinfo_at: 0.35
+    url_encoding_obfuscation: 0.25
+  authentication:
+    impossible_travel: 0.60
+    success_after_failures: 0.55
+    password_spraying: 0.55
+    failed_burst: 0.45
+    new_location: 0.35
+    sudden_behavior_change: 0.35
+    new_device: 0.30
+    session_anomaly: 0.30
+    login_velocity: 0.25
+    ip_novelty: 0.20
+    unusual_time: 0.15
+    unrecognized_user_agent: 0.15
+  media:
+    lookalike_sender_identity: 0.40
+    adapter_manipulation_flag: 0.40
+    identity_mismatch: 0.40
+    file_signature_mismatch: 0.40
+    ela_inconsistency: 0.35
+    payment_or_urgent_request_context: 0.35
+    audio_spectral_artifacts: 0.35
+    container_metadata_anomaly: 0.35
+    video_frame_inconsistency: 0.35
+    editing_software_tag: 0.30
+    exif_missing: 0.15
+  impersonation:
+    display_name_spoof: 0.45
+    official_domain_mismatch: 0.45
+    payment_request_text: 0.45
+    credential_request_text: 0.45
+    executive_claim: 0.40
+    authority_claim: 0.40
+    new_contact_claim: 0.35
+    style_deviation: 0.30
+    urgency_language: 0.30
+    reply_to_mismatch: 0.25
+    first_time_sender: 0.20
+  system_activity:
+    outbound_volume_spike: 0.45
+    new_external_destination: 0.40
+    rate_spike: 0.35
+    endpoint_enumeration: 0.35
+    token_reuse_multi_ip: 0.35
+    bulk_file_access: 0.25
+    off_hours_transfer: 0.25
+    beaconing_periodicity: 0.30
+    port_scan_pattern: 0.30
+    error_burst: 0.25
+    rare_port_usage: 0.20
+    privileged_action_anomaly: 0.35
+    known_malicious_hash: 0.60
+
+policy:
+  floors:
+    F1_ato_privileged_success_after_failures:
+      module: any
+      all_of: [success_after_failures]
+      context: [privileged_account]
+      floor: 80
+    F2_ato_takeover_pattern:
+      module: any
+      all_of: [success_after_failures]
+      any_of: [new_device, new_location]
+      floor: 60
+    F3_phish_ip_cred_lookalike:
+      module: any
+      all_of: [ip_host, credential_path]
+      any_of: [brand_lookalike, punycode]
+      floor: 65
+    F4_ioc_match:
+      module: any
+      context: [ioc_match_confirmed]
+      floor: 60
+    F5_exfil_volume_new_destination:
+      module: any
+      all_of: [outbound_volume_spike, new_external_destination]
+      floor: 60
+    F6_bec_display_name_payment:
+      module: any
+      all_of: [display_name_spoof, payment_request_text]
+      floor: 60
+  caps:
+    C1_allowlist_benign:
+      module: any
+      context: [allowlist_match]
+      none_of: [credential_request_text, payment_request_text]
+      cap: 19
+
+classification:
+  assessment:
+    inconclusive_c_below: 0.5
+    threat_min_score: 20
+    inconclusive_min_score: 20
+    inconclusive_max_score: 59
+    required_action: request_manual_verification
+  threat_type_rules:
+    phishing:
+      - threat_type: credential_harvesting
+        any_of: [credential_path, credential_request_text]
+      - threat_type: brand_impersonation
+        any_of: [brand_lookalike, punycode]
+      - threat_type: phishing_message
+        context: [message_input]
+      - threat_type: phishing_url
+    authentication:
+      - threat_type: password_spraying
+        all_of: [password_spraying]
+      - threat_type: account_takeover
+        all_of: [failed_burst, success_after_failures]
+      - threat_type: brute_force
+        all_of: [failed_burst]
+      - threat_type: anomalous_login
+    media:
+      - threat_type: executive_impersonation
+        context: [executive_or_official]
+      - threat_type: executive_impersonation
+        any_of: [lookalike_sender_identity]
+      - threat_type: synthetic_media
+    impersonation:
+      - threat_type: executive_impersonation
+        any_of: [executive_claim]
+      - threat_type: executive_impersonation
+        context: [executive_or_official]
+      - threat_type: authority_impersonation
+        any_of: [authority_claim]
+      - threat_type: authority_impersonation
+        context: [public_authority]
+      - threat_type: contact_impersonation
+        any_of: [new_contact_claim]
+      - threat_type: brand_impersonation
+    system_activity:
+      - threat_type: data_exfiltration
+        any_of: [outbound_volume_spike, new_external_destination]
+      - threat_type: api_abuse
+        any_of: [rate_spike, endpoint_enumeration, token_reuse_multi_ip]
+      - threat_type: insider_threat
+        any_of: [bulk_file_access, privileged_action_anomaly]
+      - threat_type: malware_indicator
+        any_of: [known_malicious_hash]
+      - threat_type: suspicious_network_activity
+
+alerts:
+  threshold: "severity >= MEDIUM OR assessment == inconclusive"
+  channels:
+    - ui
+    - webhook_sim
+    - email_sim
+  delivery_mode: simulated
+  webhook_and_email: "log only; no outbound delivery in prototype"
+
+safety:
+  url_redirects: "static redirect-parameter parsing only; no outbound URL fetching"
+  data: "synthetic, authorized, or public data only"
+  autonomous_response: false
+
+calibration:
+  minimum_samples_per_module: 50
+  split: dev_test
+  source_split_for_phishing_holdout: true
+  tune_only_on: dev
+  freeze_during_demo_week: true
