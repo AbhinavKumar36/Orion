@@ -84,7 +84,7 @@ export default function IncidentDetail({ incidentId, onBack }) {
               <Info className="w-4 h-4 text-primary" /> Incident Explanation
             </h3>
             <div className="text-sm text-slate-300 mb-4 bg-card p-4 rounded border border-border italic">
-              {incident.explanation.summary}
+              {incident.risk_breakdown?.assessment_reason || "Assessment details available in evidence drivers."}
             </div>
             
             <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Evidence Drivers</h4>
@@ -93,10 +93,10 @@ export default function IncidentDetail({ incidentId, onBack }) {
                 <div key={ev.type} className="bg-surface p-3 rounded border border-border text-sm">
                   <div className="flex justify-between items-center mb-1">
                     <span className="font-mono text-cyan-400">{ev.type}</span>
-                    <span className="text-xs text-slate-400">{ev.contribution > 0 ? '+' : ''}{ev.contribution.toFixed(1)} pts</span>
+                    <span className="text-xs text-slate-400">{ev.contribution > 0 ? '+' : ''}{ev.contribution ? ev.contribution.toFixed(1) : '0.0'} pts</span>
                   </div>
                   <div className="w-full bg-card h-1.5 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(0, ev.contribution_pct * 100))}%` }}></div>
+                    <div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(0, (ev.contribution_pct || 0) * 100))}%` }}></div>
                   </div>
                   <div className="text-xs text-slate-400 mt-2">{ev.description}</div>
                 </div>
@@ -111,19 +111,19 @@ export default function IncidentDetail({ incidentId, onBack }) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-card p-3 rounded border border-border text-center">
                  <div className="text-[10px] text-slate-400 uppercase">Probability (P)</div>
-                 <div className="font-mono text-xl text-white">{incident.risk_breakdown.P !== null ? incident.risk_breakdown.P.toFixed(2) : 'N/A'}</div>
+                 <div className="font-mono text-xl text-white">{(incident.risk_breakdown?.p !== null && incident.risk_breakdown?.p !== undefined) ? incident.risk_breakdown.p.toFixed(2) : 'N/A'}</div>
               </div>
               <div className="bg-card p-3 rounded border border-border text-center">
                  <div className="text-[10px] text-slate-400 uppercase">Evidence (E)</div>
-                 <div className="font-mono text-xl text-white">{incident.risk_breakdown.E.toFixed(2)}</div>
+                 <div className="font-mono text-xl text-white">{incident.risk_breakdown?.e !== undefined ? incident.risk_breakdown.e.toFixed(2) : 'N/A'}</div>
               </div>
               <div className="bg-card p-3 rounded border border-border text-center">
-                 <div className="text-[10px] text-slate-400 uppercase">Impact Score</div>
-                 <div className="font-mono text-xl text-white">{incident.risk_breakdown.impact_score.toFixed(1)}</div>
+                 <div className="text-[10px] text-slate-400 uppercase">Confidence (C)</div>
+                 <div className="font-mono text-xl text-white">{incident.risk_breakdown?.c !== undefined ? incident.risk_breakdown.c.toFixed(2) : 'N/A'}</div>
               </div>
               <div className="bg-card p-3 rounded border border-border text-center">
                  <div className="text-[10px] text-slate-400 uppercase">Final Risk</div>
-                 <div className="font-mono text-xl text-severity-high font-bold">{incident.risk_score.toFixed(1)}</div>
+                 <div className="font-mono text-xl text-severity-high font-bold">{incident.risk_score !== undefined ? incident.risk_score.toFixed(1) : 'N/A'}</div>
               </div>
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function IncidentDetail({ incidentId, onBack }) {
 
           <div className="glass-panel p-6 rounded-xl border border-border">
             <h3 className="text-sm font-bold text-white uppercase font-mono mb-4 border-b border-border pb-2 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-cyan-400" /> MITRE ATT&CK
+              <FileText className="w-4 h-4 text-cyan-400" /> MITRE ATTACK
             </h3>
             {incident.mitre_attack && incident.mitre_attack.length > 0 ? (
                <div className="flex flex-wrap gap-2">

@@ -7,7 +7,7 @@ export default function AnalyzeTab({ onIncidentCreated }) {
   const [result, setResult] = useState(null);
 
   const modules = [
-    { id: 'phishing', label: 'URL / Message', endpoint: '/api/incidents/analyze' },
+    { id: 'phishing', label: 'URL / Message', endpoint: '/api/incidents/analyze/phishing' },
     { id: 'impersonation', label: 'Impersonation', endpoint: '/api/incidents/analyze/impersonation' },
     { id: 'media', label: 'Media / Deepfake', endpoint: '/api/incidents/analyze/media' },
     { id: 'authentication', label: 'Authentication', endpoint: '/api/incidents/analyze/authentication' },
