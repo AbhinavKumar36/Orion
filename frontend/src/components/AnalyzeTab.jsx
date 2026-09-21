@@ -25,7 +25,6 @@ export default function AnalyzeTab({ onIncidentCreated }) {
       context: {}
     },
     media: {
-      asset: { type: "image", force_status: "ok", flags: ["exif_missing", "ela_inconsistency", "lookalike_sender_identity"], force_missing_ratio: 0.2, force_p_model: 0.71 },
       context: { executive_or_official: true }
     },
     authentication: {
@@ -52,11 +51,33 @@ export default function AnalyzeTab({ onIncidentCreated }) {
     setResult(null);
     try {
       const currentModule = modules.find(m => m.id === activeModule);
-      const res = await fetch(currentModule.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(demoPayloads[activeModule])
-      });
+      
+      let res;
+      if (activeModule === 'media') {
+        const formData = new FormData();
+        // Create a minimal valid 1x1 GIF for the demo to pass Tier-0 image checks
+        const dummyImage = new Uint8Array([
+          0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00, 
+          0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x21, 0xf9, 0x04, 0x01, 0x00, 0x00, 0x00, 
+          0x00, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x02, 
+          0x44, 0x01, 0x00, 0x3b
+        ]);
+        const blob = new Blob([dummyImage], { type: 'image/gif' });
+        formData.append('file', blob, 'demo_image.gif');
+        formData.append('context', JSON.stringify(demoPayloads.media.context));
+        
+        res = await fetch(currentModule.endpoint, {
+          method: 'POST',
+          body: formData
+        });
+      } else {
+        res = await fetch(currentModule.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(demoPayloads[activeModule])
+        });
+      }
+      
       const data = await res.json();
       setResult(data);
       if (onIncidentCreated) {
@@ -110,8 +131,24 @@ export default function AnalyzeTab({ onIncidentCreated }) {
              <span className="text-emerald-400">CLASSIFY</span> →
              <span className="text-amber-400">SCORE</span> →
              <span className="text-cyan-400">EXPLAIN</span> →
+             <span className="text-severity-critical">ALERT</span> →
              <span className="text-severity-high">RESPOND</span>
           </div>
+          
+          {(result.severity === 'CRITICAL' || result.severity === 'HIGH' || result.severity === 'MEDIUM' || result.assessment === 'inconclusive') && (
+            <div className="bg-severity-critical/10 border border-severity-critical/30 rounded p-4 mb-4 font-mono text-sm">
+                <div className="flex items-center gap-2 text-severity-critical font-bold mb-2">
+                    <ShieldAlert className="w-5 h-5" />
+                    🚨 ALERT GENERATED
+                </div>
+                <div className="text-slate-300">
+                    <div><span className="text-slate-400">Alert ID:</span> ALT-{result.incident_id.split('-').pop()}</div>
+                    <div><span className="text-slate-400">Severity:</span> {result.severity}</div>
+                    <div><span className="text-slate-400">Channel:</span> SOC</div>
+                    <div><span className="text-slate-400">Status:</span> NEW</div>
+                </div>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div className="bg-card/30 p-4 rounded border border-border">

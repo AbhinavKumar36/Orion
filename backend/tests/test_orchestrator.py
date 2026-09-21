@@ -13,7 +13,7 @@ def setup_db():
 
 def test_orchestrator_directly():
     orch = Orchestrator()
-    incident = orch.process_mocked_analysis(
+    incident = orch.process_analysis(
         incident_id="TEST-1",
         module="system_activity",
         layer="technology",

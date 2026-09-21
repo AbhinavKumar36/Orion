@@ -37,7 +37,7 @@ class Factor(BaseModel):
 class Explanation(BaseModel):
     factors: List[Factor]
     top_factors: List[str] = Field(default_factory=list)
-    ml_insight: Dict[str, Any] | None = None
+    ml_insight: Dict[str, Any] | List[Any] | None = None
 
 class Entity(BaseModel):
     entity_type: str

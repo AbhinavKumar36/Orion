@@ -1,1875 +1,540 @@
-# ORION — FINAL HARDENING, REAL AI & COMPETITIVE UPGRADE
+I checked the latest commit (8d5e0f6) of the live ORION repo. Latest ORION commit
 
-## ROLE
+There has been real progress since my last review — especially entity extraction, correlation wiring, repositories, and frontend work.
 
-You are the principal engineer responsible for taking the existing ORION repository from its current prototype state to a **credible, reproducible, technically defensible cybersecurity hackathon prototype**.
+But I would not accept the current PHASE_STATUS.md as accurate yet. There are still a few important gaps.
 
-Repository:
+Current reality
+Phase	Current repo claim	My assessment
+0 — Trust	Passed	🟢 Mostly complete
+1 — Real Intelligence	Passed	🟡 Mostly complete, media still mocked
+2 — SOC Pipeline	Passed	🟡 Partially complete
+3 — Differentiation	Passed	🟡 Infrastructure added, needs verification
+4 — Polish	Passed	🔴 Not actually complete
 
-`https://github.com/AbhinavKumar36/Orion`
+The biggest issue is that the documentation now says everything is passed while some of the implementation still contains obvious unfinished/mock paths.
 
-Product:
+1. Phase 0 — much better
 
-**ORION — AI-Powered Cyber Threat Intelligence & Digital Trust Platform**
+The fake metrics issue was handled.
 
-Tagline:
+metrics.json no longer contains the old fabricated 0.94/520-sample numbers.
 
-**From Digital Signals to Actionable Threats.**
+That's good.
 
-Target:
+However, the new metrics are:
 
-BPUT Hackathon — PS09 / CYBERGUARD.
+overall_f1: 1.0
+samples: 10
+p95: 1.0 ms
 
-The objective is NOT to create a larger project.
+for phishing text.
 
-The objective is to make the EXISTING ORION architecture substantially more real, defensible, reproducible, and impressive.
+That is technically reproducible, but it is not yet a convincing evaluation.
 
----
+A 10-sample evaluation producing F1 = 1.0 is not something I would put prominently in front of judges.
 
-# 0. NON-NEGOTIABLE GOVERNANCE
+So:
 
-Before touching code:
+Reproducible ≠ meaningful.
 
-1. Read:
+You need a larger, documented evaluation set before claiming meaningful performance.
 
-   * `ORION_Master_Project_Documentation_v3.3`
-   * `AGENTS.md`
-   * `risk_config.yaml`
-   * `docs/PHASE_STATUS.md`
-   * all relevant ADRs
-   * existing backend tests
-   * existing frontend structure
+I'd label this:
 
-2. Inspect the repository tree before making assumptions.
+Evaluation pipeline: implemented
+Evaluation results: preliminary
 
-3. Do NOT redesign the architecture.
+not:
 
-4. Do NOT replace the existing risk engine.
+Model performance: validated
 
-5. Do NOT weaken, delete, skip, or modify tests merely to make them pass.
+2. Phase 1 — real ML is there
 
-6. Do NOT fabricate metrics.
+This part is genuinely improved.
 
-7. Do NOT claim an ML model exists unless actual inference code executes it.
+Phishing
 
-8. Do NOT claim a dataset was used unless the repository contains:
+You now have:
 
-   * dataset source/reference
-   * preprocessing code
-   * evaluation code
-   * generated metrics
-   * reproducible execution instructions
+phishing_text_model.pkl
+phishing_url_model.pkl
 
-9. Do NOT introduce external network fetching into threat analysis.
+and the engine calls actual predict_proba().
 
-10. URL analysis MUST remain static/offline.
+✅ Real ML inference.
 
-11. Response actions MUST remain simulated/advisory only.
+Authentication
 
-12. Do NOT implement:
+You have:
 
-* credential theft
-* malware
-* exploitation
-* unauthorized scanning
-* real blocking
-* real account suspension
-* destructive remediation
-* real outbound alerts
+auth_anomaly_model.pkl
 
-13. Prefer a smaller number of REAL capabilities over many fake capabilities.
+and the engine extracts behavioral features and calls the anomaly model.
 
-14. Make small, reversible commits.
+✅ Real ML component.
 
-15. After every major change:
+Media
 
-* run backend tests
-* run frontend build
-* run relevant integration tests
-* inspect API behavior
+Still the major weakness.
 
-16. If the specification and current implementation conflict:
-    STOP and document the conflict before redesigning.
+The code still contains:
 
----
+from backend.app.detectors.media.adapter import MockTier0Adapter
 
-# 1. PRIMARY OBJECTIVE
+and the frontend demo still sends:
 
-Transform ORION from:
+force_status
+force_missing_ratio
+force_p_model
+flags
 
-> "Strong architecture + partially mocked implementation"
+So although the API now accepts a real multipart file, the demo path still has mock controls.
 
-into:
-
-> "A working, reproducible cyber-intelligence platform where real inputs produce real evidence, real ML inference where appropriate, deterministic risk scoring, explainable decisions, alerts, correlation and simulated response."
-
-The final demo must allow a judge to see:
-
-INPUT
-↓
-REAL DETECTION
-↓
-EVIDENCE
-↓
-CLASSIFICATION
-↓
-RISK SCORE
-↓
-EXPLANATION
-↓
-ALERT
-↓
-CORRELATION
-↓
-RECOMMENDED RESPONSE
-↓
-SIMULATED PLAYBOOK
-
-The system should feel like one coherent intelligence platform rather than several independent demos.
-
----
-
-# 2. FIRST TASK — PERFORM A REAL REPOSITORY AUDIT
-
-Before implementation, create:
-
-`docs/FINAL_AUDIT.md`
-
-Categorize every important v3.3 requirement as:
-
-* IMPLEMENTED
-* PARTIAL
-* MOCKED
-* MISSING
-* BROKEN
-* DOCUMENTATION-ONLY
-
-Audit at minimum:
-
-### Backend
-
-* canonical Incident contract
-* Pydantic models
-* risk engine
-* risk configuration
-* evidence generation
-* phishing detector
-* authentication detector
-* impersonation detector
-* media detector
-* system activity detector
-* explanation engine
-* response engine
-* alerts
-* correlation
-* entity extraction
-* IOC storage
-* allowlist
-* SQLite persistence
-* incident lifecycle
-* action simulation
-* demo reset
-* structured errors
-* pagination/filtering
-* OpenAPI
-
-### Frontend
-
-* dashboard
-* analyze interface
-* incident list
-* incident detail
-* evidence contribution visualization
-* risk breakdown
-* alerts
-* threat intelligence
-* entity graph
-* timeline
-* live feed
-* evaluation
-* system health
-* playbooks
-
-### Testing
-
-* unit tests
-* contract tests
-* risk golden tests
-* detector tests
-* integration tests
-* frontend build
-* evaluation reproducibility
-
-Do not implement anything yet.
-
-Finish the audit first.
-
----
-
-# 3. REMOVE FABRICATED OR UNSUBSTANTIATED EVALUATION
-
-This is HIGH PRIORITY.
-
-The current repository contains evaluation claims that must not be presented as measured facts unless reproducible.
-
-DO NOT preserve unsupported metrics merely because they look impressive.
-
-If a metric cannot be reproduced:
-
-* remove it from the main dashboard
-* mark it as `UNVERIFIED`
-* replace it with a reproducible benchmark
-
-Create:
-
-`backend/evaluation/evaluate.py`
+That is dangerous because a judge looking at the code could immediately find:
+
+force_p_model
+
+and conclude that the media result can be manually injected.
+
+Verdict
+
+Phase 1: ~80–85% genuinely complete.
+
+Don't spend time building a giant deepfake model.
+
+Instead, finish the real Tier-0 forensic path and remove the mock controls from the normal demo flow.
+
+3. The biggest problem I still see: process_mocked_analysis()
+
+This has not been fixed.
+
+Your latest orchestrator.py still contains:
+
+def process_mocked_analysis(...)
 
 and:
 
-`backend/evaluation/README.md`
+"""
+Process a mocked analysis...
+"""
 
-The evaluator must:
+Then every evidence object is still constructed as:
 
-1. Load a real/public/authorized dataset.
-2. Perform deterministic preprocessing.
-3. Run ORION inference.
-4. Generate predictions.
-5. Calculate:
+category="system"
+value="mocked"
+source_engine="mocked_detector"
+description=f"Mocked evidence for {et}"
 
-   * precision
-   * recall
-   * F1
-   * accuracy
-   * confusion matrix
-6. Save:
-   `docs/eval/metrics.json`
-7. Save:
-   `docs/eval/confusion_matrix.png`
-8. Save:
-   `docs/eval/run_metadata.json`
+This is now more problematic than before because your actual detectors are real.
 
-Metadata must include:
+You currently have:
 
-* dataset name
-* dataset source
-* dataset version/date if available
-* number of samples
-* train/test split
-* random seed
-* preprocessing version
-* model version
-* risk config version
-* timestamp
-* execution command
+REAL ML
+   ↓
+phishing engine
+   ↓
+p_model + evidence
+   ↓
+process_mocked_analysis()
+   ↓
+mocked_detector
+   ↓
+canonical incident
 
-IMPORTANT:
+That is architecturally ugly.
 
-Do not chase a high F1 score.
+This should be your next fix.
 
-A real 0.78 is better than an invented 0.94.
+Rename/rework this into something like:
 
-The UI must display:
+process_analysis()
 
-"Measured on [dataset], [N] samples"
+and introduce a proper normalized detector result:
 
-rather than vague claims like:
-
-"AI Accuracy: 94%"
-
----
-
-# 4. IMPLEMENT ONE GENUINE ML PIPELINE PROPERLY
-
-Do NOT attempt to make every module deeply AI-powered.
-
-Pick the strongest lightweight ML opportunity:
-
-## PRIORITY: PHISHING MESSAGE / URL CLASSIFICATION
-
-Implement actual inference using scikit-learn.
-
-Preferred architecture:
-
-### Text
-
-TF-IDF / character + word n-grams
-→ calibrated Logistic Regression
-
-### URL
-
-Structured URL features
-→ Logistic Regression or calibrated Gradient Boosting
-
-Potential features:
-
-* URL length
-* hostname length
-* number of subdomains
-* digit ratio
-* special-character ratio
-* suspicious TLD
-* punycode
-* IP-host usage
-* credential path
-* suspicious query parameters
-* HTTPS presence
-* brand/domain similarity
-* redirect parameter indicators
-
-The important requirement:
-
-**The model must actually execute at runtime.**
-
-Do not use a fake `p_model`.
-
-Do not hardcode predictions.
-
-Model artifacts should be versioned and loaded through an adapter.
-
-Example:
-
-`backend/app/ml/phishing_text_model.py`
-
-`backend/app/ml/phishing_url_model.py`
-
-`backend/app/ml/model_registry.py`
-
-The detector should return:
-
-```text
-detector output
+DetectorResult
+├── evidence
 ├── p_model
-├── fired evidence
-├── feature values
-├── model metadata
-└── ML insight
-```
+├── ml_insight
+├── missing_ratio
+├── entities
+├── artifacts
+└── model_metadata
 
-The risk engine remains responsible for risk.
+Then:
 
-The detector NEVER calculates severity.
+Detector
+   ↓
+DetectorResult
+   ↓
+Orchestrator
+   ↓
+Risk Engine
+   ↓
+Canonical Incident
 
----
+This would make ORION's architecture substantially cleaner.
 
-# 5. MODEL TRANSPARENCY
+4. ML insights are still not wired properly
 
-For every real ML prediction, expose:
+This is another leftover from the previous review.
 
-* model name
-* model version
-* training dataset
-* feature count
-* inference mode
-* probability
-* top contributing features
+For example, phishing does:
 
-For linear models:
+context["ml_insights"] = ml_insights
 
-`feature_value × coefficient`
+but the orchestrator still calls:
 
-may be used for explainability.
+generate_explanation(evidence_list, ml_insight=None)
 
-Example:
+So the model is generating useful information and then you're effectively throwing it away.
 
-```text
-ML INSIGHT
+That means your UI cannot convincingly answer:
 
-Model:
-PhishingTextClassifier v1.0
+"Why did the ML model classify this as suspicious?"
 
-Probability:
-0.91
+Fix this as part of the orchestrator cleanup.
 
-Top signals:
-+ credential-reset language
-+ urgency language
-+ account-verification language
-+ suspicious sender/domain
-```
+5. Phase 2 — alerts are better, but still wrong
 
-This is extremely important for judges.
+You now have central-ish alert persistence:
 
-Do not say:
+save_alert()
+list_alerts()
 
-"AI detected phishing."
+and the analysis path invokes alert creation.
 
-Say:
+Good.
 
-"The classifier estimated P(phishing)=0.91. The strongest contributing features were..."
+But the condition is still:
 
-That demonstrates actual ML literacy.
+if incident.assessment == "threat":
 
----
+Your specification says:
 
-# 6. MEDIA ANALYSIS — MAKE THE INPUT REAL
-
-The current media workflow must stop relying on JSON-only mock controls for the primary demo.
-
-Implement:
-
-`POST /api/incidents/analyze/media`
-
-using:
-
-`multipart/form-data`
-
-Accept:
-
-* JPG
-* JPEG
-* PNG
-* optionally WAV/MP3 later
-
-Do NOT attempt a massive deepfake neural network.
-
-Instead implement a defensible Tier-0 forensic pipeline.
-
-### Image pipeline
-
-UPLOAD
-
-↓
-
-file signature validation
-
-↓
-
-safe decoding
-
-↓
-
-metadata extraction
-
-↓
-
-EXIF inspection
-
-↓
-
-editing-software metadata
-
-↓
-
-ELA analysis
-
-↓
-
-image statistics
-
-↓
-
-contextual impersonation indicators
-
-↓
-
-evidence
-
-↓
-
-risk engine
-
-For ELA:
-
-* use Pillow/OpenCV
-* recompress at controlled JPEG quality
-* calculate pixel differences
-* generate heatmap artifact
-* store artifact metadata
-* display heatmap in UI
-
-The endpoint must process the actual uploaded image.
-
-Do not accept:
-
-```json
-{
-  "force_status": "ok"
-}
-```
-
-as the primary demo mechanism.
-
-Mock/test controls may remain in internal test fixtures but MUST NOT be the normal user workflow.
-
----
-
-# 7. MEDIA HONESTY
-
-Do NOT call ELA or EXIF analysis a "deepfake detector."
-
-The UI must say:
-
-> "Media authenticity analysis"
-
-and:
-
-> "Signals indicate possible manipulation; this is an assessment, not proof of synthetic media."
-
-If a model is unavailable:
-
-`assessment = inconclusive`
-
-NEVER:
-
-`unavailable → SAFE`
-
-This distinction must remain enforced.
-
----
-
-# 8. REAL AUTHENTICATION ANOMALY DETECTION
-
-Keep the deterministic rules because they are useful and explainable.
-
-But implement the existing Isolation Forest path as a genuine inference pipeline.
-
-Input:
-
-authentication event stream
-
-↓
-
-feature extraction
-
-↓
-
-baseline comparison
-
-↓
-
-Isolation Forest
-
-*
-
-deterministic security rules
-
-↓
-
-evidence fusion
-
-↓
-
-risk engine
-
-The model must produce a genuine anomaly score.
-
-Expose:
-
-* anomaly score
-* baseline features
-* rule evidence
-* model metadata
-
-Example:
-
-```text
-Authentication anomaly
-
-Failed attempts: 8
-Window: 5 minutes
-New device: YES
-New location: YES
-Successful login after failures: YES
-
-Isolation Forest anomaly score: 0.87
-
-Combined assessment: HIGH
-```
-
-Do not remove deterministic rules.
-
-The strength of ORION is:
-
-**Rules + ML + evidence fusion.**
-
----
-
-# 9. ALERT PIPELINE — MUST BE REAL
-
-PS09 explicitly requires:
-
-Detection → Classification → Risk Assessment → Explanation → Alert → Recommended Response.
-
-Implement alert creation centrally.
-
-An alert MUST be created when:
-
-```text
 severity >= MEDIUM
 OR
 assessment == inconclusive
-```
 
-Do this in the backend orchestration path.
+Those are not equivalent.
 
-Do NOT rely on the frontend to generate alerts.
+Example
 
-Persist alerts in SQLite.
+C2:
 
-Required fields:
+risk = 20
+severity = LOW
+assessment = inconclusive
 
-* alert_id
-* incident_id
-* severity
-* message
-* channel
-* created_at
-* acknowledged
-* acknowledged_by
+According to your ORION specification:
 
-Channels remain simulated:
+ALERT = YES
 
-* UI
-* webhook_sim
-* email_sim
+Current implementation:
 
-No real external sending.
+assessment == threat
 
-Frontend:
+ALERT = NO
 
-Dashboard should show:
+So this is still a contract violation.
 
-### LIVE SECURITY ALERTS
+Fix this before Phase 3 is declared complete.
+6. Phase 3 — this is where the latest commit actually made progress
 
-Example:
+The latest commit explicitly adds:
 
-```text
-[CRITICAL]
-Potential Account Takeover
-user: admin@orion.local
-Risk: 97
-2 minutes ago
-```
+backend API endpoints, database repositories, threat correlation services, and frontend UI components.
 
-Clicking it opens the incident.
+And the API now invokes:
 
-This makes the PS09 "Alert" requirement visibly undeniable.
-
----
-
-# 10. INCIDENT CORRELATION — MAKE THE CONSTELLATION REAL
-
-This is one of the strongest potential differentiators.
-
-Implement backend correlation.
-
-Do NOT build a graph first.
-
-Build the intelligence first.
-
-### Entity extraction
-
-Extract canonical entities:
-
-* user
-* email
-* IP
-* domain
-* URL
-* device
-
-Normalize them.
-
-Then:
-
-For every new incident:
-
-1. find incidents sharing entities
-2. restrict to configurable time window
-3. create/reuse correlation_id
-4. store related incident IDs
-5. calculate correlation reason
-
-Example:
-
-```text
-Incident A
-Phishing email
-target: alice@company.local
-
-↓
-
-Incident B
-Authentication anomaly
-user: alice@company.local
-IP: 185.x.x.x
-
-↓
-
-Incident C
-Suspicious session
-same user + same IP
-```
-
-ORION should show:
-
-```text
-ATTACK CONSTELLATION
-
-Phishing
-   ↓
-Credential Exposure
-   ↓
-Authentication Anomaly
-   ↓
-Suspicious Session
-```
-
-This is far more impressive than a decorative graph.
-
----
-
-# 11. GRAPH UI
-
-After correlation works:
-
-Use React Flow / D3 / existing graph library.
-
-Nodes:
-
-* incidents
-* users
-* IPs
-* domains
-* devices
-
-Edges:
-
-* SHARED_ENTITY
-* CAUSED
-* RELATED
-* SAME_ACTOR
-* SAME_IP
-
-Click a node → incident/entity detail.
-
-Every edge must have a reason.
-
-Example:
-
-```text
-RELATED BECAUSE:
-
-user = alice@company.local
-AND
-time difference = 17 minutes
-```
-
-Do NOT create decorative random graph edges.
-
----
-
-# 12. MITRE ATT&CK
-
-Do not present MITRE mapping as decoration.
-
-Map only where there is a defensible relationship.
-
-Example:
-
-Authentication anomaly:
-
-`T1110 — Brute Force`
-
-Credential phishing:
-
-`T1566 — Phishing`
-
-Account takeover/session:
-
-appropriate ATT&CK mapping where supported.
-
-UI should show:
-
-```text
-MITRE ATT&CK
-
-T1566
-Phishing
-
-Evidence:
-credential_request_text
-suspicious_domain
-brand_lookalike
-```
-
-If mapping is uncertain:
-
-do not invent it.
-
----
-
-# 13. FIX THE FRONTEND/BACKEND CONTRACT
-
-Perform a complete API contract audit.
-
-Every frontend request must match backend Pydantic schemas.
-
-Pay particular attention to:
-
-* authentication event payloads
-* media payload
-* impersonation payload
-* system activity payload
-* incident filters
-* pagination
-* alert acknowledgement
-* status changes
-* simulated actions
-
-Generate TypeScript API types from FastAPI OpenAPI where practical.
-
-Do not maintain duplicate hand-written API assumptions.
-
----
-
-# 14. INCIDENT DETAIL — MAKE IT JUDGE-READY
-
-The Incident Detail page should become the strongest screen in ORION.
-
-Structure:
-
-## THREAT VERDICT
-
-CRITICAL / HIGH / MEDIUM / LOW / SAFE / INCONCLUSIVE
-
-Risk:
-
-`92 / 100`
-
-Confidence:
-
-`0.87`
-
----
-
-## WHY?
-
-Evidence cards:
-
-```text
-Brand lookalike
-Weight: 0.50
-Contribution: +X
-
-Credential request
-Weight: 0.45
-Contribution: +X
-
-Urgency language
-Weight: 0.30
-Contribution: +X
-```
-
----
-
-## HOW DID ORION DECIDE?
-
-Show:
-
-```text
-Evidence Strength (E)
-Model Probability (P)
-Confidence (C)
-Impact
-Policy Floor/Cap
-Final Risk
-```
-
----
-
-## ML INSIGHT
-
-Show actual model output.
-
----
-
-## MITRE ATT&CK
-
-Show mapped techniques where defensible.
-
----
-
-## RELATED INCIDENTS
-
-Show correlation chain.
-
----
-
-## RESPONSE
-
-Show recommended actions.
-
-Each action:
-
-`RUN PLAYBOOK`
-
-must remain simulated.
-
-After simulation:
-
-`SIMULATED`
-
-with timestamp and audit entry.
-
----
-
-# 15. FIX CONTRIBUTION VISUALIZATION
-
-Verify the exact semantics of:
-
-`contribution`
+EntityExtractor.extract_from_context(...)
 
 and:
 
-`contribution_pct`
+CorrelationEngine(repo)
+correlator.correlate_incident(...)
 
-Do not multiply a percentage by 100 twice.
+So Phase 3 is no longer empty infrastructure.
 
-Define clearly:
+That's good.
 
-Either:
+The database repository also now supports:
 
-```text
-contribution_pct = 0.23
-```
+entities
+incident_entities
+correlation_id
 
-and UI uses:
+and methods such as:
 
-```text
-23%
-```
+get_correlated_incidents()
+update_correlation_id()
 
-OR:
+So the pieces are there.
 
-```text
-contribution_pct = 23
-```
+But I would not yet call the differentiator "done."
 
-and UI uses:
+The critical question is:
 
-```text
-23%
-```
+Does the correlation engine produce a meaningful attack chain from real detector output, or is it primarily correlating demo/context entities?
 
-Pick ONE convention and enforce it everywhere.
+Right now, the entity extraction in the endpoints is heavily based on:
 
-Add a regression test.
+EntityExtractor.extract_from_context(...)
 
----
+That means you need to verify that the actual detector inputs produce canonical entities automatically.
 
-# 16. EXPLANATION INVARIANT
+For example:
 
-Every explanation must be generated from actual evidence.
+Phishing:
+admin@orion-c0rp.com
+185.12.3.4
+orion-c0rp.com
 
-If explanation says:
+then later:
 
-> "The URL uses a suspicious domain."
+Authentication:
+admin@orion-c0rp.com
+185.12.3.4
+dev_unknown
 
-there MUST be evidence supporting:
+should automatically produce:
 
-`suspicious_domain`
+             phishing
+                 │
+                 │ same user
+                 │ same IP
+                 ▼
+          authentication
+                 │
+                 ▼
+          account takeover
 
-The explanation engine must never invent facts.
+without manually injecting the relationship.
 
-Test:
+That's the real Phase 3 test.
 
-```text
-every explanation factor evidence_id
-MUST exist in incident.evidence
-```
+7. Your PHASE_STATUS.md is currently inconsistent
 
-This is one of ORION's strongest trust features.
+This is actually a documentation bug.
 
----
+It says:
 
-# 17. RISK ENGINE — DO NOT BREAK IT
+Current Phase: Phase 0
+Status: IN PROGRESS
 
-The v3.3 risk engine is a core differentiator.
+but then says:
 
-Preserve:
+Phase 0 PASSED
+Phase 1 PASSED
+Phase 2 PASSED
+Phase 3 PASSED
+Phase 4 PASSED
 
-```text
-E = 1 - Π(1 - wi)
+It also has sections labelled:
 
-P = model probability
-OR
-P = 0.9E in rules-only mode
+Phase 4 Polish
+Phase 5 SOC Dashboard
+Phase 4 Impersonation...
+Phase 3 Authentication...
+Phase 2 Phishing...
+Phase 1 Core...
 
-C = clamp(1 - D - 0.5M, 0.2, 1.0)
+So the phase numbering has become confusing.
 
-F = 0.5E + 0.5C
+Fix this immediately.
 
-Raw = 100 × P × F × Impact
-```
+Your current roadmap should simply be:
 
-Then apply:
+Phase 0 — Trust
+Phase 1 — Real Intelligence
+Phase 2 — SOC Pipeline
+Phase 3 — Differentiation
+Phase 4 — Polish
 
-* clamp
-* policy floor
-* cap
-* inconclusive logic
-* severity band
-* half-up rounding
+Then have one status table.
 
-Do not move risk logic into detectors.
+No duplicate old phase numbering.
 
-Do not let frontend calculate risk.
+8. Phase 4 is definitely not finished
 
-All risk must originate from the backend risk engine.
+This is the biggest documentation overclaim.
 
----
+PHASE_STATUS.md currently says:
 
-# 18. GOLDEN CASES ARE SACRED
+Phase 4 Polish ... PASSED
+[x] Implement reproducible evaluation script
+[x] Measure genuine latency and F1 scores
+[x] Overhaul reset_demo.py
+
+But your own metrics.json says:
+
+ablation:
+  UNVERIFIED
+
+and the evaluation is only:
+
+10 samples
+F1 = 1.0
+
+Also, the frontend still doesn't present the complete polished SOC workflow I would expect from your v3.3 specification.
+
+So Phase 4 should not be marked PASSED yet.
 
-All existing golden cases must continue to match:
+9. The frontend still misses the most important storytelling element
 
-A0
-A1
-A2
+Your AnalyzeTab pipeline currently displays:
 
-B0
-B1
-B2
-B3
-B4
+INPUT
+ ↓
+DETECT
+ ↓
+CLASSIFY
+ ↓
+SCORE
+ ↓
+EXPLAIN
+ ↓
+RESPOND
 
-C1
-C2
+But your PS09-required chain is:
 
-D1
-E1
+INPUT
+ ↓
+DETECTION
+ ↓
+CLASSIFICATION
+ ↓
+RISK ASSESSMENT
+ ↓
+EXPLANATION
+ ↓
+ALERT
+ ↓
+RECOMMENDED RESPONSE
 
-Run them after every risk-engine modification.
+You are still missing ALERT in the visual chain.
 
-If a change breaks a golden case:
+That's surprisingly important for the hackathon demo.
 
-STOP.
+Change it to:
 
-Do not modify the golden case simply to make the test pass.
+INPUT
+→ DETECT
+→ CLASSIFY
+→ SCORE
+→ EXPLAIN
+→ ALERT
+→ RESPOND
 
----
+Then actually show:
 
-# 19. SAFETY HARDENING
+🚨 ALERT GENERATED
+Alert ID: ALT-XXXX
+Severity: HIGH
+Channel: SOC
+Status: NEW
 
-Implement/verify:
+That gives the judge the complete PS09 story in one screen.
 
-### URLs
+10. One thing I really like about the new direction
 
-* static parsing only
-* no requests
-* no redirects
-* no crawling
-* no DNS resolution
-* no external scanning
+The project is starting to become something more interesting than:
 
-### Uploads
+"We have a phishing model + deepfake model + authentication model."
 
-* MIME validation
-* file signature validation
-* size limits
-* safe temporary storage
-* opaque filenames
-* bounded decoding
-* no executable paths
+The architecture is moving toward:
 
-### Logs
+             DIGITAL SIGNALS
+                    │
+       ┌────────────┼────────────┐
+       ▼            ▼            ▼
+    Phishing      Auth         Media
+       │            │            │
+       └────────────┼────────────┘
+                    ▼
+              EVIDENCE
+                    │
+                    ▼
+              RISK ENGINE
+                    │
+                    ▼
+              INCIDENT
+                    │
+             ┌──────┴──────┐
+             ▼             ▼
+           ALERT       ENTITIES
+                           │
+                           ▼
+                     CORRELATION
+                           │
+                           ▼
+                   ATTACK CONSTELLATION
+                           │
+                           ▼
+                    RESPONSE
 
-Defang URLs:
+That is the differentiator.
 
-`hxxp://example[.]com`
+Not the number of models.
 
-Avoid logging:
+What I would do NOW
 
-* passwords
-* authentication tokens
-* API keys
-* unnecessary PII
+Don't give Antigravity another gigantic "implement everything" prompt.
 
-### Response
+Give it a short integration-hardening task first.
 
-All actions:
+Priority order
 
-```text
-automated = false
-```
+1. Fix orchestrator
 
-Nothing real is blocked, revoked, quarantined, or sent.
+remove process_mocked_analysis
+normalized detector result
+real evidence provenance
+pass ML insights
+preserve risk engine exactly
 
----
+2. Fix alert semantics
 
-# 20. DEMO RESET
+severity >= MEDIUM OR inconclusive
+centralized alert policy
+test C2 explicitly
 
-Verify:
+3. Remove mock controls from normal media demo
 
-`POST /api/demo/reset`
+no force_p_model
+no force_missing_ratio
+no asset_mock
+actual file-derived evidence
 
-works correctly.
+4. Verify Phase 3
 
-It must only operate when:
+extract entities from real detector payloads
+canonicalize them
+correlate automatically
+demonstrate phishing → auth relationship
+ensure graph represents actual DB relationships
 
-```text
-ORION_DEMO_RESET_ENABLED=true
-```
+5. Fix frontend chain
 
-It must reset:
+INPUT → DETECT → CLASSIFY → SCORE → EXPLAIN → ALERT → RESPOND
 
-* incidents
-* alerts
-* correlations
-* action logs
-* demo entities
-* demo history
+6. Only then do Phase 4 polish
 
-It must NOT delete arbitrary production data.
+meaningful evaluation dataset
+honest metrics
+model cards
+polished incident detail
+attack constellation
+demo reset
+final narrative
+Bottom line
 
----
+Yes, the repo has genuinely improved. The latest commit is not just cosmetic; it adds real backend correlation/entity infrastructure and connects more of the system.
 
-# 21. DEMO DATA — CREATE A STORY, NOT RANDOM SAMPLES
+But I would currently describe ORION as:
 
-Create one coherent attack storyline.
+A strong integrated prototype with real phishing/auth ML, persistent incidents, initial alerting, and correlation infrastructure — with remaining work in canonical detector integration, alert correctness, media authenticity, and final evaluation/demo polish.
 
-Example:
+I would not yet tell the judges that all 5 phases are fully complete.
 
-### EVENT 1 — PHISHING
-
-CEO receives spoofed Microsoft-style password-reset message.
-
-ORION:
-
-Risk = HIGH/CRITICAL
-
-Evidence:
-
-* brand lookalike
-* suspicious domain
-* credential path
-* urgency language
-
-Alert created.
-
----
-
-### EVENT 2 — CREDENTIAL COMPROMISE
-
-Same user later generates:
-
-* failed login burst
-* new IP
-* new device
-* successful login
-
-ORION:
-
-Risk = CRITICAL
-
----
-
-### EVENT 3 — SESSION ANOMALY
-
-Same user/IP produces abnormal session behavior.
-
-ORION correlates all incidents.
-
-Dashboard displays:
-
-```text
-ATTACK CONSTELLATION
-
-Phishing
-   ↓
-Account Takeover
-   ↓
-Session Anomaly
-```
-
-This is the main demo narrative.
-
----
-
-# 22. BUILD A "WHY THIS IS DIFFERENT" SCREEN
-
-Add a compact section to the dashboard:
-
-## WHY ORION?
-
-Not:
-
-"AI-powered cybersecurity."
-
-Instead:
-
-### 01 — Evidence Fusion
-
-Multiple weak signals become one explainable risk assessment.
-
-### 02 — Confidence-Aware Decisions
-
-ORION can say:
-
-`INCONCLUSIVE`
-
-instead of pretending uncertain analysis is safe.
-
-### 03 — Cross-Event Correlation
-
-A phishing event can be connected to a later authentication anomaly.
-
-### 04 — Explainable Risk
-
-Every score can be decomposed into:
-
-`P + E + C + Impact + Policy`
-
-### 05 — Human-Controlled Response
-
-Recommended actions are simulated and auditable.
-
-This should be concise, not marketing-heavy.
-
----
-
-# 23. ADD A TECHNICAL "MODEL CARD" PANEL
-
-Judges will likely ask:
-
-"What AI are you actually using?"
-
-Prepare a visible technical answer.
-
-For each model:
-
-```text
-MODEL
-Phishing URL Classifier
-
-Algorithm
-Logistic Regression
-
-Features
-18 engineered URL features
-
-Training Data
-[dataset]
-
-Calibration
-[method]
-
-Inference
-Offline
-
-Output
-P(phishing)
-
-Explainability
-Coefficient × feature contribution
-```
-
-For authentication:
-
-```text
-Isolation Forest
-+
-deterministic security rules
-```
-
-For media:
-
-```text
-Tier-0 forensic analysis
-EXIF + ELA + metadata + file signatures
-
-Not a deepfake proof system.
-```
-
-This honesty makes ORION more credible.
-
----
-
-# 24. EVALUATION DASHBOARD
-
-Do not display fake universal "accuracy."
-
-Display:
-
-```text
-EVALUATION
-
-Dataset
-Phishing Dataset X
-
-Samples
-1,000
-
-Precision
-0.xx
-
-Recall
-0.xx
-
-F1
-0.xx
-
-P95 latency
-xxx ms
-```
-
-Then:
-
-### Ablation
-
-```text
-Rules Only
-ML Only
-Fused
-```
-
-This directly demonstrates why the hybrid architecture exists.
-
----
-
-# 25. PERFORMANCE
-
-Measure actual:
-
-* p50 latency
-* p95 latency
-* inference latency
-* risk-engine latency
-* media-analysis latency
-
-Do not hardcode values.
-
-Generate them during evaluation.
-
----
-
-# 26. DOCUMENTATION
-
-Update:
-
-`README.md`
-
-to contain:
-
-1. Problem
-2. ORION solution
-3. Architecture
-4. Modules
-5. Real AI/ML components
-6. Risk engine
-7. Explainability
-8. Correlation
-9. Demo instructions
-10. Evaluation
-11. Safety
-12. Limitations
-13. Deployment
-
-Add:
-
-`docs/architecture.md`
-
-`docs/models.md`
-
-`docs/datasets.md`
-
-`docs/evaluation.md`
-
-`docs/limitations.md`
-
-Make sure every claim in these documents is supported by the actual implementation.
-
----
-
-# 27. REMOVE MISLEADING LANGUAGE
-
-Search repository-wide for:
-
-* "AI-powered"
-* "deepfake detection"
-* "95%"
-* "94%"
-* "100%"
-* "real-time"
-* "production-ready"
-* "enterprise-grade"
-* "fully automated"
-
-For every claim:
-
-Either prove it with implementation/evaluation,
-
-OR rewrite it as:
-
-* prototype
-* heuristic
-* simulated
-* Tier-0
-* evaluated on X dataset
-* not production-grade
-* advisory
-
-Credibility is more valuable than marketing.
-
----
-
-# 28. PHASE STATUS MUST REFLECT REALITY
-
-Update:
-
-`docs/PHASE_STATUS.md`
-
-ONLY after verifying actual implementation.
-
-Do not mark:
-
-`PASSED`
-
-because the code exists.
-
-A phase passes only if its exit criteria are demonstrably satisfied.
-
-Add evidence:
-
-```text
-PASSING TESTS
-API endpoint
-demo screenshot
-evaluation output
-```
-
-where practical.
-
----
-
-# 29. FINAL TEST MATRIX
-
-Before declaring completion, run:
-
-### Backend
-
-* pytest
-* contract tests
-* golden tests
-* detector tests
-* API integration tests
-* alert tests
-* correlation tests
-* upload safety tests
-* explanation invariant tests
-* risk property tests
-
-### Frontend
-
-* npm build
-* lint if configured
-* API integration verification
-
-### Evaluation
-
-* evaluator script
-* metrics generation
-* confusion matrix
-* latency benchmark
-
-### Demo
-
-Run:
-
-1. reset
-2. phishing
-3. alert
-4. incident detail
-5. authentication anomaly
-6. correlation
-7. graph
-8. simulated response
-9. media upload
-10. evaluation
-
----
-
-# 30. FINAL DEMO EXPERIENCE
-
-The final demo should tell ONE story.
-
-Do not jump between unrelated features.
-
-Recommended narrative:
-
-## ACT 1 — THE SIGNAL
-
-A suspicious message arrives.
-
-ORION detects:
-
-```text
-Brand impersonation
-Credential request
-Suspicious domain
-Urgency
-```
-
----
-
-## ACT 2 — THE DECISION
-
-ORION calculates:
-
-```text
-P
-E
-C
-Impact
-Risk = XX
-Severity = HIGH
-```
-
-Judge sees exactly why.
-
----
-
-## ACT 3 — THE ALERT
-
-SOC dashboard immediately shows:
-
-```text
-CRITICAL SECURITY ALERT
-```
-
----
-
-## ACT 4 — THE ATTACK EVOLVES
-
-Same user later generates:
-
-```text
-Failed login burst
-New device
-New location
-Successful login
-```
-
-ORION detects possible ATO.
-
----
-
-## ACT 5 — THE CONSTELLATION
-
-ORION automatically correlates the incidents.
-
-Graph:
-
-```text
-Phishing
-   │
-   ▼
-Credential Exposure
-   │
-   ▼
-Account Takeover
-   │
-   ▼
-Session Anomaly
-```
-
----
-
-## ACT 6 — THE RESPONSE
-
-ORION recommends:
-
-```text
-Require MFA
-Revoke Session
-Notify Security Team
-```
-
-Judge clicks:
-
-`SIMULATE PLAYBOOK`
-
-ORION records:
-
-```text
-SIMULATED
-timestamp
-analyst
-action
-```
-
-No real destructive action occurs.
-
----
-
-## ACT 7 — THE FORENSICS
-
-Upload a suspicious image.
-
-ORION performs:
-
-* file validation
-* EXIF
-* editing metadata
-* ELA
-* authenticity assessment
-
-Show the actual uploaded image and ELA heatmap.
-
----
-
-## ACT 8 — THE SCIENCE
-
-Show:
-
-```text
-Model
-Features
-Probability
-Evidence
-Risk Formula
-Confidence
-Evaluation
-```
-
-This is where you demonstrate that ORION is not just a UI.
-
----
-
-# 31. COMPETITIVE DIFFERENTIATOR
-
-Do NOT attempt to win by claiming:
-
-> "We have more AI models."
-
-Instead position the technical differentiator as:
-
-# EVIDENCE → RISK → RELATIONSHIP → RESPONSE
-
-Most prototypes stop at:
-
-`Detection`
-
-ORION should demonstrate:
-
-```text
-Signal
-  ↓
-Evidence
-  ↓
-AI / Rules
-  ↓
-Confidence
-  ↓
-Risk
-  ↓
-Explanation
-  ↓
-Alert
-  ↓
-Cross-event correlation
-  ↓
-Attack storyline
-  ↓
-Human-controlled response
-```
-
-That is the core product identity.
-
----
-
-# 32. WHAT NOT TO BUILD
-
-Do NOT spend time on:
-
-* fancy landing page redesign
-* unnecessary 3D animations
-* additional modules
-* voice cloning
-* large deepfake neural networks
-* LLM chatbot
-* live external threat feeds
-* autonomous remediation
-* real email/webhook integrations
-* complex authentication/RBAC
-* Kubernetes
-* microservices
-* multi-tenant architecture
-
-unless every core requirement above is already working.
-
-The objective is **depth, not breadth**.
-
----
-
-# 33. PRIORITY ORDER
-
-Implement in exactly this order:
-
-## P0 — TRUST
-
-1. Remove/fix unsupported metrics
-2. Reproducible evaluation
-3. API contract correctness
-4. Risk/golden regression
-5. Phase-status accuracy
-
-## P1 — REAL INTELLIGENCE
-
-6. Genuine phishing ML inference
-7. Genuine authentication anomaly inference
-8. Real media file upload + forensic analysis
-
-## P2 — SOC PIPELINE
-
-9. Backend alert creation
-10. Alert persistence
-11. Alert dashboard
-12. Incident lifecycle verification
-
-## P3 — DIFFERENTIATION
-
-13. Entity extraction
-14. Correlation engine
-15. Attack constellation
-16. MITRE evidence mapping
-
-## P4 — POLISH
-
-17. Incident Detail improvements
-18. Evaluation dashboard
-19. Model cards
-20. Demo storyline
-21. README/documentation
-
----
-
-# 34. COMMIT STRATEGY
-
-Create small commits such as:
-
-```text
-audit: reconcile v3.3 implementation status
-
-fix: remove unsupported evaluation claims
-
-feat: add reproducible phishing evaluation
-
-feat: integrate real phishing classifier
-
-feat: implement authenticated media forensic upload
-
-feat: wire centralized alert generation
-
-feat: implement incident entity correlation
-
-feat: add attack constellation graph
-
-fix: reconcile frontend backend API contracts
-
-test: expand integration and regression coverage
-
-docs: finalize demo and technical limitations
-```
-
-Do not create one giant commit.
-
----
-
-# 35. FINAL ACCEPTANCE CRITERIA
-
-ORION is COMPLETE only when:
-
-### Intelligence
-
-* [ ] At least one genuine ML classifier runs end-to-end
-* [ ] Authentication anomaly model actually executes
-* [ ] Media endpoint accepts a real file
-* [ ] Media analysis produces real forensic evidence
-
-### Risk
-
-* [ ] v3.3 risk engine preserved
-* [ ] all golden cases pass
-* [ ] property tests pass
-* [ ] evidence contributions correct
-
-### SOC
-
-* [ ] alerts automatically generated
-* [ ] alerts persisted
-* [ ] alerts visible in dashboard
-* [ ] incidents filterable
-* [ ] lifecycle works
-* [ ] playbooks simulated and logged
-
-### Correlation
-
-* [ ] entities extracted
-* [ ] related incidents linked
-* [ ] correlation ID generated
-* [ ] graph reflects actual relationships
-* [ ] attack storyline visible
-
-### Evaluation
-
-* [ ] metrics reproducible
-* [ ] dataset documented
-* [ ] evaluator script exists
-* [ ] confusion matrix exists
-* [ ] latency measured
-* [ ] no fabricated numbers
-
-### Safety
-
-* [ ] no network URL fetching
-* [ ] safe uploads
-* [ ] defanged logging
-* [ ] no destructive response
-* [ ] no credential theft/scanning
-
-### Presentation
-
-* [ ] demo can be completed in ~10 minutes
-* [ ] one coherent attack storyline
-* [ ] every major claim can be demonstrated live
-* [ ] fallback demo/reset exists
-* [ ] documentation matches implementation
-
----
-
-# 36. FINAL INSTRUCTION TO ANTIGRAVITY
-
-Do not respond with a plan only.
-
-Execute the work incrementally.
-
-At the beginning of each phase:
-
-1. State what you inspected.
-2. State what you will change.
-3. Make the smallest safe implementation.
-4. Run tests.
-5. Verify the result.
-6. Update documentation.
-7. Commit.
-8. Move to the next phase only if acceptance criteria pass.
-
-If a requested feature cannot be implemented reliably within the existing architecture, prefer:
-
-**a smaller genuine implementation**
-
-over:
-
-**a larger mocked implementation.**
-
-The final ORION should make a technically knowledgeable judge think:
-
-> "This team understands how cyber detection systems actually turn signals into evidence, risk, correlation and response."
-
-Not:
-
-> "This team built a beautiful dashboard with fake AI."
-
-That distinction is the entire purpose of this hardening pass.
+The single most important technical cleanup now is getting rid of the process_mocked_analysis → mocked_detector → value="mocked" path. Once that is gone, ORION's architecture will finally match the story you're telling.

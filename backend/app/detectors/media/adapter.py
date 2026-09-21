@@ -26,23 +26,15 @@ class MockTier0Adapter:
         return media_type in ["image"]
         
     def analyze(self, asset: Dict[str, Any], context: dict) -> AdapterResult:
-        # Check if we should use mock logic (from tests)
-        if asset.get("force_status") or not asset.get("bytes"):
-            status = asset.get("force_status", "ok")
-            evidence = asset.get("flags", [])
-            missing_checks = asset.get("force_missing_checks", [])
-            artifacts = []
-            if "ela_inconsistency" in evidence:
-                artifacts.append("ela_heatmap.png")
-            return AdapterResult(
-                status=status,
-                p_manipulated=None,
-                evidence=evidence,
-                missing_checks=missing_checks,
-                artifacts=artifacts
-            )
-            
         file_bytes = asset.get("bytes")
+        if not file_bytes:
+            return AdapterResult(
+                status="unavailable",
+                p_manipulated=None,
+                evidence=[],
+                missing_checks=["file_signature", "exif", "ela"],
+                artifacts=[]
+            )
         # REAL TIER-0 LOGIC
         evidence = []
         missing_checks = []

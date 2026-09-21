@@ -24,8 +24,8 @@ def _save_incident_and_alert(repo: IncidentRepository, incident: Incident):
     correlator = CorrelationEngine(repo)
     correlator.correlate_incident(incident.incident_id)
 
-    # Generate alert if threat
-    if incident.assessment == "threat":
+    # Generate alert if required by policy
+    if incident.severity in ["CRITICAL", "HIGH", "MEDIUM"] or incident.assessment == "inconclusive":
         alert_id = f"ALT-{uuid.uuid4().hex[:8].upper()}"
         msg = f"New {incident.severity} threat detected: {incident.threat_type} in module {incident.module.value}"
         repo.save_alert(alert_id, incident.incident_id, incident.severity, "SOC", msg)
@@ -81,7 +81,7 @@ def analyze_incident(req: MockAnalyzeRequest):
 
     orchestrator = Orchestrator()
     try:
-        incident = orchestrator.process_mocked_analysis(
+        incident = orchestrator.process_analysis(
             incident_id=incident_id,
             module=req.module,
             layer=req.layer,
@@ -125,13 +125,17 @@ def analyze_phishing_endpoint(req: PhishingAnalyzeRequest):
     # Let's pass it via context.
     context = req.context.copy()
     context["ml_insights"] = ml_insights
+    if req.url:
+        context["url"] = req.url
+    if req.message:
+        context["email"] = req.message.get("sender")
     
     raw_entities = EntityExtractor.extract_from_context("phishing", context)
     entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
     
     orchestrator = Orchestrator()
     try:
-        incident = orchestrator.process_mocked_analysis(
+        incident = orchestrator.process_analysis(
             incident_id=incident_id,
             module="phishing",
             layer="human",
@@ -164,13 +168,15 @@ def analyze_authentication_endpoint(req: AuthAnalyzeRequest):
     
     context = req.context.copy()
     context["ml_insights"] = ml_insights
+    if req.events:
+        context["events"] = req.events
     
     raw_entities = EntityExtractor.extract_from_context("authentication", context)
     entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
     
     orchestrator = Orchestrator()
     try:
-        incident = orchestrator.process_mocked_analysis(
+        incident = orchestrator.process_analysis(
             incident_id=incident_id,
             module="authentication",
             layer="behavioral",
@@ -204,13 +210,15 @@ def analyze_impersonation_endpoint(req: ImpersonationAnalyzeRequest):
     context = req.context.copy()
     for flag in context_flags:
         context[flag] = True
+    if req.message:
+        context["email"] = req.message.get("sender_name", req.message.get("sender"))
         
     raw_entities = EntityExtractor.extract_from_context("impersonation", context)
     entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
         
     orchestrator = Orchestrator()
     try:
-        incident = orchestrator.process_mocked_analysis(
+        incident = orchestrator.process_analysis(
             incident_id=incident_id,
             module="impersonation",
             layer="human",
@@ -267,7 +275,7 @@ async def analyze_media_endpoint(
     
     orchestrator = Orchestrator()
     try:
-        incident = orchestrator.process_mocked_analysis(
+        incident = orchestrator.process_analysis(
             incident_id=incident_id,
             module="media",
             layer="media",
@@ -298,18 +306,22 @@ def analyze_system_endpoint(req: SystemAnalyzeRequest):
     
     fired_evidence_types, p_model = analyze_system_activity(req.events)
     
-    raw_entities = EntityExtractor.extract_from_context("system_activity", req.context)
+    context = req.context.copy()
+    if req.events:
+        context["events"] = req.events
+
+    raw_entities = EntityExtractor.extract_from_context("system_activity", context)
     entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
     
     orchestrator = Orchestrator()
     try:
-        incident = orchestrator.process_mocked_analysis(
+        incident = orchestrator.process_analysis(
             incident_id=incident_id,
             module="system_activity",
             layer="system",
             input_type="event_stream",
             fired_evidence_types=fired_evidence_types,
-            context=req.context,
+            context=context,
             p_model=p_model,
             missing_ratio=0.0,
             entities=entities

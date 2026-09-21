@@ -23,7 +23,7 @@ class Orchestrator:
     def __init__(self, config: Dict[str, Any] | None = None):
         self.config = config or get_risk_config()
 
-    def process_mocked_analysis(
+    def process_analysis(
         self,
         incident_id: str,
         module: str,
@@ -39,7 +39,7 @@ class Orchestrator:
         model_metadata: Dict[str, Any] | None = None
     ) -> Incident:
         """
-        Process a mocked analysis by running the risk engine on pre-determined fired evidence.
+        Process a detector analysis by running the risk engine on fired evidence.
         """
         module_enum = Module(module)
         fired_set = set(fired_evidence_types)
@@ -103,19 +103,20 @@ class Orchestrator:
                 Evidence(
                     evidence_id=f"EV-{incident_id}-{i}",
                     type=et,
-                    category="system", # simplified for mock
-                    value="mocked",
+                    category="detector",
+                    value="true",
                     weight=w,
                     direction="supports_threat",
-                    source_engine="mocked_detector",
-                    description=f"Mocked evidence for {et}",
+                    source_engine=module,
+                    description=f"Evidence detected by {module} engine",
                     contribution=contrib,
                     contribution_pct=contrib_pct
                 )
             )
             
         # 5. Generate Explanation
-        explanation = generate_explanation(evidence_list, ml_insight=None)
+        ml_insight = context.get("ml_insights", None)
+        explanation = generate_explanation(evidence_list, ml_insight=ml_insight)
         
         # 6. Generate Recommended Actions
         actions = generate_responses(
