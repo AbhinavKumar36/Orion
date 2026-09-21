@@ -37,17 +37,30 @@ class CorrelationEngine:
         shared_incident_ids = self.repo.get_correlated_incidents(entity_pks)
         
         # We need to find if any of these shared incidents already have a correlation_id
+        # We also enforce a 24-hour correlation window.
         existing_corr_ids = set()
+        valid_shared_incident_ids = []
         
         with get_db() as conn:
             if shared_incident_ids:
                 placeholders = ",".join("?" for _ in shared_incident_ids)
                 rows = conn.execute(
-                    f"SELECT correlation_id FROM incidents WHERE incident_id IN ({placeholders}) AND correlation_id IS NOT NULL",
+                    f"SELECT incident_id, timestamp, correlation_id FROM incidents WHERE incident_id IN ({placeholders})",
                     tuple(shared_incident_ids)
                 ).fetchall()
+                
+                from datetime import datetime, timedelta
+                window_start = incident.timestamp.replace(tzinfo=None) - timedelta(hours=24)
+                window_end = incident.timestamp.replace(tzinfo=None) + timedelta(hours=24)
+                
                 for row in rows:
-                    existing_corr_ids.add(row[0])
+                    inc_ts = datetime.fromisoformat(row[1]).replace(tzinfo=None)
+                    if window_start <= inc_ts <= window_end:
+                        valid_shared_incident_ids.append(row[0])
+                        if row[2] is not None:
+                            existing_corr_ids.add(row[2])
+                
+                shared_incident_ids = valid_shared_incident_ids
 
         # Determine the target correlation_id
         if existing_corr_ids:

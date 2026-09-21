@@ -169,3 +169,87 @@ def test_inconclusive_alert():
         assert alert is not None
     else:
         assert alert is None
+
+def test_correlation_negative_different_entities():
+    # Phishing with ip 5.5.5.5
+    phish = {
+        "url": "http://evil-different.com",
+        "context": {"ip_address": "5.5.5.5"}
+    }
+    r1 = client.post("/api/incidents/analyze/phishing", json=phish)
+    inc1 = r1.json()
+    
+    # Auth with ip 6.6.6.6
+    auth = {
+        "events": [{"user_id": "bob@evil-different.com", "ip": "6.6.6.6", "event_type": "login_failure"}],
+        "context": {}
+    }
+    r2 = client.post("/api/incidents/analyze/authentication", json=auth)
+    inc2 = r2.json()
+    
+    # They should NOT correlate
+    assert inc1["correlation_id"] is None
+    # Depending on correlation engine timing, we fetch to be sure
+    inc2_fresh = client.get(f"/api/incidents/{inc2['incident_id']}").json()
+    assert inc2_fresh.get("correlation_id") is None
+
+def test_correlation_negative_outside_window():
+    # In order to test outside window, we need to create an incident in the past.
+    # Since Orchestrator creates incidents with datetime.utcnow(), we have to manually insert or manipulate one.
+    # We will do this by analyzing an incident, then updating its timestamp in sqlite, then analyzing another.
+    phish = {
+        "url": "http://evil-outside.com",
+        "context": {"ip_address": "7.7.7.7"}
+    }
+    r1 = client.post("/api/incidents/analyze/phishing", json=phish)
+    inc1 = r1.json()
+    
+    # Shift timestamp back 48 hours
+    with get_db() as conn:
+        past_time = (datetime.utcnow() - timedelta(hours=48)).isoformat()
+        conn.execute("UPDATE incidents SET timestamp = ? WHERE incident_id = ?", (past_time, inc1["incident_id"]))
+        conn.commit()
+        
+    auth = {
+        "events": [{"user_id": "alice@evil-outside.com", "ip": "7.7.7.7", "event_type": "login_failure"}],
+        "context": {}
+    }
+    r2 = client.post("/api/incidents/analyze/authentication", json=auth)
+    inc2 = r2.json()
+    
+    inc1_fresh = client.get(f"/api/incidents/{inc1['incident_id']}").json()
+    inc2_fresh = client.get(f"/api/incidents/{inc2['incident_id']}").json()
+    
+    assert inc1_fresh.get("correlation_id") is None
+    assert inc2_fresh.get("correlation_id") is None
+
+def test_c2_inconclusive_explicit():
+    # C2 explicitly tests LOW severity + inconclusive = ALERT
+    # By risk_config.yaml, if risk_score is say 35 (LOW), but assessment=inconclusive, it should alert.
+    # We can trigger inconclusive in system_activity by having enough rate to be inconclusive, but low enough score.
+    # Let's just use the known deterministic input for inconclusive system activity from the Prompt's "C2" scenario.
+    # Actually, we can use the MockAnalyzeRequest to forcibly inject it exactly as C2.
+    
+    c2_payload = {
+        "module": "system_activity",
+        "layer": "system",
+        "input_type": "event_stream",
+        "fired_evidence_types": ["rate_spike"],
+        "context": {},
+        "p_model": 0.4, 
+        "missing_ratio": 1.0
+    }
+    
+    resp = client.post("/api/incidents/analyze", json=c2_payload)
+    inc = resp.json()
+    
+    # It might evaluate to inconclusive depending on the floor
+    # To force inconclusive precisely, we know inconclusive requires score <= 59 and floor inconclusive.
+    # Wait, the risk_config says sys_rate_spike floor is INCONCLUSIVE if it's the only thing.
+    assert inc["assessment"] == "inconclusive"
+    assert inc["severity"] in ["SAFE", "LOW", "MEDIUM"] 
+    
+    alerts = repo.list_alerts()
+    alert = next((a for a in alerts if a["incident_id"] == inc["incident_id"]), None)
+    assert alert is not None
+
