@@ -1,0 +1,7 @@
+{
+  "dataset_name": "phishing_eval.csv",
+  "dataset_source": "synthetic_seed",
+  "number_of_samples": 10,
+  "model_version": "PhishingTextClassifier v1.0",
+  "timestamp": "2026-09-21T14:20:39Z"
+}

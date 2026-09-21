@@ -24,6 +24,7 @@ import AnalyzeTab from './components/AnalyzeTab';
 import IncidentsTab from './components/IncidentsTab';
 import IncidentDetail from './components/IncidentDetail';
 import ThreatIntelTab from './components/ThreatIntelTab';
+import LiveAlertFeed from './components/LiveAlertFeed';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -198,8 +199,9 @@ export default function App() {
           {activeTab === 'incidents' && <IncidentsTab onViewDetail={(id) => { setActiveIncidentId(id); setActiveTab('incidentDetail'); }} />}
           {activeTab === 'incidentDetail' && activeIncidentId && <IncidentDetail incidentId={activeIncidentId} onBack={() => { setActiveIncidentId(null); setActiveTab('incidents'); }} />}
           {activeTab === 'intel' && <ThreatIntelTab />}
+          {activeTab === 'feed' && <LiveAlertFeed />}
 
-          {(!['overview', 'analyze', 'incidents', 'incidentDetail', 'intel'].includes(activeTab)) && (
+          {(!['overview', 'analyze', 'incidents', 'incidentDetail', 'intel', 'feed'].includes(activeTab)) && (
             <div className="glass-panel p-8 rounded-xl border border-border text-center space-y-3">
               <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary mx-auto">
                 <Terminal className="w-6 h-6" />

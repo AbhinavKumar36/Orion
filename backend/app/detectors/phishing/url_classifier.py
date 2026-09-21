@@ -1,5 +1,6 @@
 import numpy as np
-from sklearn.linear_model import LogisticRegression
+import joblib
+from pathlib import Path
 from typing import Set, List, Dict
 
 URL_FEATURES_LIST = [
@@ -10,30 +11,17 @@ URL_FEATURES_LIST = [
 
 class PhishingURLClassifier:
     """
-    A lightweight, deterministic URL classifier.
-    Fits LogisticRegression on boolean URL features.
+    Loads a pre-trained LogisticRegression pipeline from artifacts.
+    Provides genuine offline ML inference on extracted URL features.
     """
     def __init__(self):
-        # Synthetic dataset (Rows = samples, Cols = features in URL_FEATURES_LIST)
-        # Sample 1: punycode + no_https
-        # Sample 2: ip_host + suspicious_port
-        # Sample 3: long_url + excessive_subdomains
-        # Sample 4: clean
-        # Sample 5: clean but long
-        X_train = [
-            [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],  # Malicious
-            [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],  # Malicious
-            [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],  # Malicious
-            [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],  # Malicious
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Clean
-            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],  # Clean
-            [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],  # Clean
-        ]
-        y_train = [1, 1, 1, 1, 0, 0, 0]
-        
-        self.clf = LogisticRegression(class_weight="balanced", random_state=42)
-        self.clf.fit(X_train, y_train)
-        self.coefs = self.clf.coef_[0]
+        model_path = Path("backend/models/artifacts/phishing_url_model.pkl")
+        if not model_path.exists():
+            raise FileNotFoundError(f"Missing model artifact: {model_path}")
+            
+        model_data = joblib.load(model_path)
+        self.clf = model_data["classifier"]
+        self.coefs = model_data["coefs"]
 
     def _vectorize(self, features: Set[str]) -> np.ndarray:
         vec = np.zeros(len(URL_FEATURES_LIST))
@@ -44,23 +32,18 @@ class PhishingURLClassifier:
 
     def predict_proba(self, features: Set[str]) -> float:
         if not features:
-            # Empty features -> 0 probabilty
             return 0.0
         X_vec = self._vectorize(features).reshape(1, -1)
         proba = self.clf.predict_proba(X_vec)[0][1]
         return float(proba)
 
     def get_ml_insight(self, features: Set[str]) -> List[Dict[str, float]]:
-        """
-        Extract top features driving the score (coefficient * 1).
-        """
         if not features:
             return []
             
         X_vec = self._vectorize(features)
         contributions = X_vec * self.coefs
         
-        # Get top 5 positive contributions
         top_indices = np.argsort(contributions)[-5:][::-1]
         
         insights = []
@@ -72,5 +55,4 @@ class PhishingURLClassifier:
                 })
         return insights
 
-# Singleton instance
 url_classifier = PhishingURLClassifier()

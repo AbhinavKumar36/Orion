@@ -1,50 +1,25 @@
 {
   "summary": {
-    "overall_f1": 0.94,
-    "total_samples": 520,
-    "p95_latency_ms": 112
+    "overall_f1": "UNVERIFIED (Target: 0.94)",
+    "total_samples": "UNVERIFIED",
+    "p95_latency_ms": "UNVERIFIED"
   },
   "modules": {
     "phishing": {
-      "accuracy": 0.96,
-      "precision": 0.97,
-      "recall": 0.94,
-      "f1": 0.95,
-      "samples": 200,
-      "latency_p95_ms": 105
-    },
-    "impersonation": {
-      "accuracy": 0.92,
-      "precision": 0.89,
-      "recall": 0.95,
-      "f1": 0.92,
-      "samples": 100,
-      "latency_p95_ms": 120
-    },
-    "media": {
-      "accuracy": 0.88,
-      "precision": 0.91,
-      "recall": 0.85,
-      "f1": 0.88,
-      "samples": 20,
-      "latency_p95_ms": 1450
+      "status": "UNVERIFIED - Awaiting real ML inference implementation"
     },
     "authentication": {
-      "accuracy": 0.97,
-      "precision": 0.98,
-      "recall": 0.96,
-      "f1": 0.97,
-      "samples": 200,
-      "latency_p95_ms": 45
+      "status": "UNVERIFIED - Awaiting actual Isolation Forest baseline"
+    },
+    "media": {
+      "status": "UNVERIFIED - Relies on MockTier0Adapter"
     }
   },
   "ablation": {
-    "rules_only_f1": 0.82,
-    "ml_only_f1": 0.89,
-    "fused_f1": 0.94
+    "status": "UNVERIFIED - Pending reproducible pipeline"
   },
   "reproducibility": {
-    "status": "PASSED",
-    "notes": "12/12 golden cases matched exact raw scores."
+    "status": "FAILED",
+    "notes": "Current F1 claims are placeholders and not derived from real datasets in this repository. Must run backend/evaluation/evaluate.py to generate real metrics."
   }
 }

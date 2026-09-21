@@ -27,3 +27,11 @@ def get_dashboard_targets():
         return repo.get_dashboard_targets()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/alerts", response_model=List[Dict[str, Any]])
+def get_dashboard_alerts(limit: int = 50, offset: int = 0):
+    repo = IncidentRepository()
+    try:
+        return repo.list_alerts(limit=limit, offset=offset)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

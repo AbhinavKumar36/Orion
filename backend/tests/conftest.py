@@ -1,9 +1,11 @@
 import os
+import sys
 import tempfile
 import pytest
 from pathlib import Path
 
 # Override the database path for tests before importing anything else
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 test_db_fd, test_db_path = tempfile.mkstemp(suffix=".db")
 os.environ["ORION_DB_PATH"] = test_db_path
 

@@ -265,3 +265,21 @@ class IncidentRepository:
             ''').fetchall()
             return [dict(r) for r in rows]
 
+    def save_alert(self, alert_id: str, incident_id: str, severity: str, channel: str, message: str) -> None:
+        from datetime import datetime
+        with get_db() as conn:
+            conn.execute(
+                """
+                INSERT INTO alerts (
+                    alert_id, incident_id, severity, channel, message, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (alert_id, incident_id, severity, channel, message, datetime.utcnow().isoformat())
+            )
+
+    def list_alerts(self, limit: int = 50, offset: int = 0) -> List[Dict[str, Any]]:
+        with get_db() as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("SELECT * FROM alerts ORDER BY created_at DESC LIMIT ? OFFSET ?", (limit, offset)).fetchall()
+            return [dict(r) for r in rows]
+

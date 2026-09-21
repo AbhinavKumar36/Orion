@@ -1,6 +1,7 @@
 import uuid
-from typing import List, Dict, Any
-from fastapi import APIRouter, HTTPException, Depends
+from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form
+import json
 from pydantic import BaseModel
 from backend.app.models.domain import Incident
 from backend.app.services.orchestrator import Orchestrator
@@ -12,6 +13,13 @@ from backend.app.detectors.media.engine import analyze_media
 from backend.app.detectors.system_activity.engine import analyze_system_activity
 
 router = APIRouter()
+
+def _save_incident_and_alert(repo: IncidentRepository, incident: Incident):
+    repo.save_incident(incident)
+    if incident.assessment == "threat":
+        alert_id = f"ALT-{uuid.uuid4().hex[:8].upper()}"
+        msg = f"New {incident.severity} threat detected: {incident.threat_type} in module {incident.module.value}"
+        repo.save_alert(alert_id, incident.incident_id, incident.severity, "SOC", msg)
 
 class MockAnalyzeRequest(BaseModel):
     incident_id: str | None = None
@@ -76,7 +84,7 @@ def analyze_incident(req: MockAnalyzeRequest):
         
     repo = IncidentRepository()
     try:
-        repo.save_incident(incident)
+        _save_incident_and_alert(repo, incident)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save incident: {e}")
         
@@ -122,7 +130,7 @@ def analyze_phishing_endpoint(req: PhishingAnalyzeRequest):
         
     repo = IncidentRepository()
     try:
-        repo.save_incident(incident)
+        _save_incident_and_alert(repo, incident)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save incident: {e}")
         
@@ -157,7 +165,7 @@ def analyze_authentication_endpoint(req: AuthAnalyzeRequest):
         
     repo = IncidentRepository()
     try:
-        repo.save_incident(incident)
+        _save_incident_and_alert(repo, incident)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save incident: {e}")
         
@@ -193,20 +201,41 @@ def analyze_impersonation_endpoint(req: ImpersonationAnalyzeRequest):
         
     repo = IncidentRepository()
     try:
-        repo.save_incident(incident)
+        _save_incident_and_alert(repo, incident)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save incident: {e}")
         
     return incident
 
 @router.post("/analyze/media", response_model=Incident, status_code=201)
-def analyze_media_endpoint(req: MediaAnalyzeRequest):
+async def analyze_media_endpoint(
+    incident_id: Optional[str] = Form(None),
+    context: str = Form("{}"),
+    file: UploadFile = File(...)
+):
     """
-    Triggers the Phase 4 Media Authenticity (Module B2) Engine.
+    Triggers the Phase 4 Media Authenticity (Module B2) Engine via multipart/form-data.
     """
-    incident_id = req.incident_id or f"ORN-MED-{uuid.uuid4().hex[:6].upper()}"
+    incident_id = incident_id or f"ORN-MED-{uuid.uuid4().hex[:6].upper()}"
     
-    fired_evidence_types, p_model, missing_ratio = analyze_media(req.asset, req.context)
+    try:
+        context_dict = json.loads(context)
+    except json.JSONDecodeError:
+        context_dict = {}
+        
+    file_bytes = await file.read()
+    
+    asset = {
+        "filename": file.filename,
+        "content_type": file.content_type,
+        "bytes": file_bytes,
+        "type": "image" if file.content_type and "image" in file.content_type else "unknown"
+    }
+    
+    if "asset_mock" in context_dict:
+        asset.update(context_dict["asset_mock"])
+    
+    fired_evidence_types, p_model, missing_ratio = analyze_media(asset, context_dict)
     
     orchestrator = Orchestrator()
     try:
@@ -216,7 +245,7 @@ def analyze_media_endpoint(req: MediaAnalyzeRequest):
             layer="media",
             input_type="file",
             fired_evidence_types=fired_evidence_types,
-            context=req.context,
+            context=context_dict,
             p_model=p_model,
             missing_ratio=missing_ratio
         )
@@ -225,7 +254,7 @@ def analyze_media_endpoint(req: MediaAnalyzeRequest):
         
     repo = IncidentRepository()
     try:
-        repo.save_incident(incident)
+        _save_incident_and_alert(repo, incident)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save incident: {e}")
         
@@ -257,7 +286,7 @@ def analyze_system_endpoint(req: SystemAnalyzeRequest):
         
     repo = IncidentRepository()
     try:
-        repo.save_incident(incident)
+        _save_incident_and_alert(repo, incident)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save incident: {e}")
         

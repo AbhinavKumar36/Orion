@@ -30,13 +30,18 @@ export default function AnalyzeTab({ onIncidentCreated }) {
     },
     authentication: {
       events: [
-        { actor_id: "user_1", ip_address: "1.2.3.4", location: "US", status: "success", mfa_used: false }
+        { user_id: "admin@orion-c0rp.com", ip: "185.12.3.4", geo: { country: "RU" }, event_type: "login_failure", device_id: "dev_unknown" },
+        { user_id: "admin@orion-c0rp.com", ip: "185.12.3.4", geo: { country: "RU" }, event_type: "login_failure", device_id: "dev_unknown" },
+        { user_id: "admin@orion-c0rp.com", ip: "185.12.3.4", geo: { country: "RU" }, event_type: "login_failure", device_id: "dev_unknown" },
+        { user_id: "admin@orion-c0rp.com", ip: "185.12.3.4", geo: { country: "RU" }, event_type: "login_failure", device_id: "dev_unknown" },
+        { user_id: "admin@orion-c0rp.com", ip: "185.12.3.4", geo: { country: "RU" }, event_type: "login_failure", device_id: "dev_unknown" },
+        { user_id: "admin@orion-c0rp.com", ip: "185.12.3.4", geo: { country: "RU" }, event_type: "login_success", device_id: "dev_unknown" }
       ],
       context: {}
     },
     system_activity: {
       events: [
-        { source: "network_flow", actor: "svc_backup", dst_ip: "1.2.3.4", bytes_out: 20000, action: "write" }
+        { source: "network_flow", actor: "admin@orion-c0rp.com", dst_ip: "185.12.3.4", bytes_out: 5000000, action: "data_transfer" }
       ],
       context: { sensitive_service: true }
     }
