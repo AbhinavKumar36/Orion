@@ -1,422 +1,60 @@
-I checked the latest commit (8d5e0f6) of the live ORION repo. Latest ORION commit
+# ORION — Integration Hardening & End-to-End Verification
 
-There has been real progress since my last review — especially entity extraction, correlation wiring, repositories, and frontend work.
+## Objective
 
-But I would not accept the current PHASE_STATUS.md as accurate yet. There are still a few important gaps.
+Do NOT add new major features.
 
-Current reality
-Phase	Current repo claim	My assessment
-0 — Trust	Passed	🟢 Mostly complete
-1 — Real Intelligence	Passed	🟡 Mostly complete, media still mocked
-2 — SOC Pipeline	Passed	🟡 Partially complete
-3 — Differentiation	Passed	🟡 Infrastructure added, needs verification
-4 — Polish	Passed	🔴 Not actually complete
+Do NOT redesign the architecture.
 
-The biggest issue is that the documentation now says everything is passed while some of the implementation still contains obvious unfinished/mock paths.
+Do NOT change the v3.3 risk engine.
 
-1. Phase 0 — much better
+Do NOT modify golden expected values.
 
-The fake metrics issue was handled.
+The goal of this task is to prove that the existing ORION components work together as one end-to-end cyber-intelligence pipeline.
 
-metrics.json no longer contains the old fabricated 0.94/520-sample numbers.
+## Step 0 — Inspect
 
-That's good.
+Read:
 
-However, the new metrics are:
+* `AGENTS.md`
+* `ORION_Master_Project_Documentation_v3.3.md`
+* `risk_config.yaml`
+* `docs/PHASE_STATUS.md`
+* existing backend tests
+* existing frontend structure
 
-overall_f1: 1.0
-samples: 10
-p95: 1.0 ms
+Inspect the current implementation before editing anything.
 
-for phishing text.
+## Step 1 — Establish baseline
 
-That is technically reproducible, but it is not yet a convincing evaluation.
+Run:
 
-A 10-sample evaluation producing F1 = 1.0 is not something I would put prominently in front of judges.
-
-So:
-
-Reproducible ≠ meaningful.
-
-You need a larger, documented evaluation set before claiming meaningful performance.
-
-I'd label this:
-
-Evaluation pipeline: implemented
-Evaluation results: preliminary
-
-not:
-
-Model performance: validated
-
-2. Phase 1 — real ML is there
-
-This part is genuinely improved.
-
-Phishing
-
-You now have:
-
-phishing_text_model.pkl
-phishing_url_model.pkl
-
-and the engine calls actual predict_proba().
-
-✅ Real ML inference.
-
-Authentication
-
-You have:
-
-auth_anomaly_model.pkl
-
-and the engine extracts behavioral features and calls the anomaly model.
-
-✅ Real ML component.
-
-Media
-
-Still the major weakness.
-
-The code still contains:
-
-from backend.app.detectors.media.adapter import MockTier0Adapter
-
-and the frontend demo still sends:
-
-force_status
-force_missing_ratio
-force_p_model
-flags
-
-So although the API now accepts a real multipart file, the demo path still has mock controls.
-
-That is dangerous because a judge looking at the code could immediately find:
-
-force_p_model
-
-and conclude that the media result can be manually injected.
-
-Verdict
-
-Phase 1: ~80–85% genuinely complete.
-
-Don't spend time building a giant deepfake model.
-
-Instead, finish the real Tier-0 forensic path and remove the mock controls from the normal demo flow.
-
-3. The biggest problem I still see: process_mocked_analysis()
-
-This has not been fixed.
-
-Your latest orchestrator.py still contains:
-
-def process_mocked_analysis(...)
+```bash
+cd backend
+pytest -q
+```
 
 and:
 
-"""
-Process a mocked analysis...
-"""
+```bash
+cd frontend
+npm run build
+```
 
-Then every evidence object is still constructed as:
+Record failures before making changes.
 
-category="system"
-value="mocked"
-source_engine="mocked_detector"
-description=f"Mocked evidence for {et}"
+Do not modify tests simply to make them pass.
 
-This is now more problematic than before because your actual detectors are real.
+## Step 2 — Verify phishing → alert
 
-You currently have:
+Use a realistic phishing message containing:
 
-REAL ML
-   ↓
-phishing engine
-   ↓
-p_model + evidence
-   ↓
-process_mocked_analysis()
-   ↓
-mocked_detector
-   ↓
-canonical incident
+* brand impersonation
+* suspicious domain
+* credential request
+* urgency language
 
-That is architecturally ugly.
-
-This should be your next fix.
-
-Rename/rework this into something like:
-
-process_analysis()
-
-and introduce a proper normalized detector result:
-
-DetectorResult
-├── evidence
-├── p_model
-├── ml_insight
-├── missing_ratio
-├── entities
-├── artifacts
-└── model_metadata
-
-Then:
-
-Detector
-   ↓
-DetectorResult
-   ↓
-Orchestrator
-   ↓
-Risk Engine
-   ↓
-Canonical Incident
-
-This would make ORION's architecture substantially cleaner.
-
-4. ML insights are still not wired properly
-
-This is another leftover from the previous review.
-
-For example, phishing does:
-
-context["ml_insights"] = ml_insights
-
-but the orchestrator still calls:
-
-generate_explanation(evidence_list, ml_insight=None)
-
-So the model is generating useful information and then you're effectively throwing it away.
-
-That means your UI cannot convincingly answer:
-
-"Why did the ML model classify this as suspicious?"
-
-Fix this as part of the orchestrator cleanup.
-
-5. Phase 2 — alerts are better, but still wrong
-
-You now have central-ish alert persistence:
-
-save_alert()
-list_alerts()
-
-and the analysis path invokes alert creation.
-
-Good.
-
-But the condition is still:
-
-if incident.assessment == "threat":
-
-Your specification says:
-
-severity >= MEDIUM
-OR
-assessment == inconclusive
-
-Those are not equivalent.
-
-Example
-
-C2:
-
-risk = 20
-severity = LOW
-assessment = inconclusive
-
-According to your ORION specification:
-
-ALERT = YES
-
-Current implementation:
-
-assessment == threat
-
-ALERT = NO
-
-So this is still a contract violation.
-
-Fix this before Phase 3 is declared complete.
-6. Phase 3 — this is where the latest commit actually made progress
-
-The latest commit explicitly adds:
-
-backend API endpoints, database repositories, threat correlation services, and frontend UI components.
-
-And the API now invokes:
-
-EntityExtractor.extract_from_context(...)
-
-and:
-
-CorrelationEngine(repo)
-correlator.correlate_incident(...)
-
-So Phase 3 is no longer empty infrastructure.
-
-That's good.
-
-The database repository also now supports:
-
-entities
-incident_entities
-correlation_id
-
-and methods such as:
-
-get_correlated_incidents()
-update_correlation_id()
-
-So the pieces are there.
-
-But I would not yet call the differentiator "done."
-
-The critical question is:
-
-Does the correlation engine produce a meaningful attack chain from real detector output, or is it primarily correlating demo/context entities?
-
-Right now, the entity extraction in the endpoints is heavily based on:
-
-EntityExtractor.extract_from_context(...)
-
-That means you need to verify that the actual detector inputs produce canonical entities automatically.
-
-For example:
-
-Phishing:
-admin@orion-c0rp.com
-185.12.3.4
-orion-c0rp.com
-
-then later:
-
-Authentication:
-admin@orion-c0rp.com
-185.12.3.4
-dev_unknown
-
-should automatically produce:
-
-             phishing
-                 │
-                 │ same user
-                 │ same IP
-                 ▼
-          authentication
-                 │
-                 ▼
-          account takeover
-
-without manually injecting the relationship.
-
-That's the real Phase 3 test.
-
-7. Your PHASE_STATUS.md is currently inconsistent
-
-This is actually a documentation bug.
-
-It says:
-
-Current Phase: Phase 0
-Status: IN PROGRESS
-
-but then says:
-
-Phase 0 PASSED
-Phase 1 PASSED
-Phase 2 PASSED
-Phase 3 PASSED
-Phase 4 PASSED
-
-It also has sections labelled:
-
-Phase 4 Polish
-Phase 5 SOC Dashboard
-Phase 4 Impersonation...
-Phase 3 Authentication...
-Phase 2 Phishing...
-Phase 1 Core...
-
-So the phase numbering has become confusing.
-
-Fix this immediately.
-
-Your current roadmap should simply be:
-
-Phase 0 — Trust
-Phase 1 — Real Intelligence
-Phase 2 — SOC Pipeline
-Phase 3 — Differentiation
-Phase 4 — Polish
-
-Then have one status table.
-
-No duplicate old phase numbering.
-
-8. Phase 4 is definitely not finished
-
-This is the biggest documentation overclaim.
-
-PHASE_STATUS.md currently says:
-
-Phase 4 Polish ... PASSED
-[x] Implement reproducible evaluation script
-[x] Measure genuine latency and F1 scores
-[x] Overhaul reset_demo.py
-
-But your own metrics.json says:
-
-ablation:
-  UNVERIFIED
-
-and the evaluation is only:
-
-10 samples
-F1 = 1.0
-
-Also, the frontend still doesn't present the complete polished SOC workflow I would expect from your v3.3 specification.
-
-So Phase 4 should not be marked PASSED yet.
-
-9. The frontend still misses the most important storytelling element
-
-Your AnalyzeTab pipeline currently displays:
-
-INPUT
- ↓
-DETECT
- ↓
-CLASSIFY
- ↓
-SCORE
- ↓
-EXPLAIN
- ↓
-RESPOND
-
-But your PS09-required chain is:
-
-INPUT
- ↓
-DETECTION
- ↓
-CLASSIFICATION
- ↓
-RISK ASSESSMENT
- ↓
-EXPLANATION
- ↓
-ALERT
- ↓
-RECOMMENDED RESPONSE
-
-You are still missing ALERT in the visual chain.
-
-That's surprisingly important for the hackathon demo.
-
-Change it to:
+Verify:
 
 INPUT
 → DETECT
@@ -426,115 +64,201 @@ INPUT
 → ALERT
 → RESPOND
 
-Then actually show:
+Verify that the generated alert is actually persisted.
 
-🚨 ALERT GENERATED
-Alert ID: ALT-XXXX
-Severity: HIGH
-Channel: SOC
-Status: NEW
+Verify:
 
-That gives the judge the complete PS09 story in one screen.
+```text
+severity >= MEDIUM
+OR
+assessment == inconclusive
+```
 
-10. One thing I really like about the new direction
+creates an alert.
 
-The project is starting to become something more interesting than:
+Explicitly test an inconclusive incident.
 
-"We have a phishing model + deepfake model + authentication model."
+## Step 3 — Verify canonical incident
 
-The architecture is moving toward:
+Inspect the generated incident.
 
-             DIGITAL SIGNALS
-                    │
-       ┌────────────┼────────────┐
-       ▼            ▼            ▼
-    Phishing      Auth         Media
-       │            │            │
-       └────────────┼────────────┘
-                    ▼
-              EVIDENCE
-                    │
-                    ▼
-              RISK ENGINE
-                    │
-                    ▼
-              INCIDENT
-                    │
-             ┌──────┴──────┐
-             ▼             ▼
-           ALERT       ENTITIES
-                           │
-                           ▼
-                     CORRELATION
-                           │
-                           ▼
-                   ATTACK CONSTELLATION
-                           │
-                           ▼
-                    RESPONSE
+Confirm it contains:
 
-That is the differentiator.
+* incident_id
+* module
+* layer
+* threat_type
+* assessment
+* severity
+* risk_score
+* confidence
+* risk_breakdown
+* evidence
+* evidence contributions
+* explanation
+* recommended_actions
+* entities
+* model_metadata
 
-Not the number of models.
+Verify the explanation invariant:
 
-What I would do NOW
+Every explanation factor evidence_id MUST exist in incident.evidence.
 
-Don't give Antigravity another gigantic "implement everything" prompt.
+## Step 4 — Verify authentication correlation
 
-Give it a short integration-hardening task first.
+Create an authentication event using an entity that appeared in the phishing incident.
 
-Priority order
+Example:
 
-1. Fix orchestrator
+```text
+user: ceo@example.com
 
-remove process_mocked_analysis
-normalized detector result
-real evidence provenance
-pass ML insights
-preserve risk engine exactly
+5 failed logins within 5 minutes
+followed by successful login
+new device
+new location
+```
 
-2. Fix alert semantics
+Verify that the authentication detector generates a separate incident.
 
-severity >= MEDIUM OR inconclusive
-centralized alert policy
-test C2 explicitly
+## Step 5 — Verify automatic entity correlation
 
-3. Remove mock controls from normal media demo
+Do NOT manually create the relationship.
 
-no force_p_model
-no force_missing_ratio
-no asset_mock
-actual file-derived evidence
+Verify that ORION automatically:
 
-4. Verify Phase 3
+1. extracts the entity
+2. canonicalizes it
+3. persists it
+4. finds the related incident
+5. assigns the same correlation_id
+6. stores related_incident_ids
 
-extract entities from real detector payloads
-canonicalize them
-correlate automatically
-demonstrate phishing → auth relationship
-ensure graph represents actual DB relationships
+The relationship must originate from actual persisted incident/entity data.
 
-5. Fix frontend chain
+## Step 6 — Verify attack constellation
 
-INPUT → DETECT → CLASSIFY → SCORE → EXPLAIN → ALERT → RESPOND
+Verify that the frontend graph/constellation is generated from the actual correlation data.
 
-6. Only then do Phase 4 polish
+Do not create decorative/static graph relationships.
 
-meaningful evaluation dataset
-honest metrics
-model cards
-polished incident detail
-attack constellation
-demo reset
-final narrative
-Bottom line
+Minimum acceptable chain:
 
-Yes, the repo has genuinely improved. The latest commit is not just cosmetic; it adds real backend correlation/entity infrastructure and connects more of the system.
+```text
+PHISHING
+   ↓
+shared entity
+   ↓
+ACCOUNT TAKEOVER
+```
 
-But I would currently describe ORION as:
+If a third real correlated incident already works, verify:
 
-A strong integrated prototype with real phishing/auth ML, persistent incidents, initial alerting, and correlation infrastructure — with remaining work in canonical detector integration, alert correctness, media authenticity, and final evaluation/demo polish.
+```text
+PHISHING
+   ↓
+ACCOUNT TAKEOVER
+   ↓
+SESSION/SYSTEM ANOMALY
+```
 
-I would not yet tell the judges that all 5 phases are fully complete.
+## Step 7 — Verify simulated response
 
-The single most important technical cleanup now is getting rid of the process_mocked_analysis → mocked_detector → value="mocked" path. Once that is gone, ORION's architecture will finally match the story you're telling.
+For a detected incident, execute one recommended response through the existing simulation endpoint.
+
+Verify:
+
+* action status becomes `simulated`
+* `simulated_at` is recorded
+* ACTION_LOG is created
+* INCIDENT_HISTORY is updated
+* `automated == false`
+* no real external action occurs
+* incident lifecycle status is not automatically changed to resolved
+
+## Step 8 — Add regression tests
+
+Only after manually understanding the existing behavior, add focused tests for:
+
+1. alert threshold
+2. inconclusive alert
+3. entity persistence
+4. cross-module correlation
+5. related incident retrieval
+6. simulated action logging
+7. explanation evidence invariant
+
+Do not rewrite unrelated tests.
+
+## Step 9 — Frontend verification
+
+Confirm AnalyzeTab visibly presents:
+
+```text
+INPUT
+→ DETECT
+→ CLASSIFY
+→ SCORE
+→ EXPLAIN
+→ ALERT
+→ RESPOND
+```
+
+Verify that the alert shown in the UI corresponds to the backend-generated alert.
+
+Do not generate a fake alert ID solely for presentation.
+
+## Step 10 — Phase status
+
+Only after all verification succeeds, update:
+
+`docs/PHASE_STATUS.md`
+
+so that status reflects demonstrated implementation rather than file/code existence.
+
+Include concrete evidence for each passed criterion.
+
+## Acceptance Criteria
+
+This task is complete only when the following works end-to-end:
+
+```text
+Real phishing input
+      ↓
+Real detector
+      ↓
+Real evidence
+      ↓
+Canonical incident
+      ↓
+Risk engine
+      ↓
+Persisted alert
+      ↓
+Entity extraction
+      ↓
+Real authentication event
+      ↓
+Second incident
+      ↓
+Automatic correlation
+      ↓
+Attack constellation
+      ↓
+Simulated response
+      ↓
+Action audit trail
+```
+
+At the end report:
+
+1. tests before changes
+2. changes made
+3. tests after changes
+4. exact end-to-end scenario verified
+5. correlation evidence
+6. alert evidence
+7. response simulation evidence
+8. remaining gaps
+
+Do not claim a phase passed unless its acceptance criteria were actually demonstrated.
