@@ -7,10 +7,10 @@
 
 ---
 
-## Phase 6 Evaluation & Hardening (DEMOTED TO PENDING)
-- [ ] Implement reproducible evaluation script.
-- [ ] Measure genuine latency and F1 scores.
-- [ ] Overhaul `reset_demo.py` to seed real Attack Constellation story.
+## Phase 4 Polish (Model Cards, Real Evaluation, Reset) (PASSED)
+- [x] Implement reproducible evaluation script.
+- [x] Measure genuine latency and F1 scores.
+- [x] Overhaul `reset_demo.py` to seed real Attack Constellation story.
 
 ---
 
@@ -29,7 +29,7 @@
 
 ---
 
-## Phase 3 Authentication Engine (PARTIAL)
+## Phase 3 Authentication Engine (PASSED)
 - [x] Implemented `rules_engine.py` for deterministic anomaly rules.
 - [x] Replaced hardcoded baseline rules with a genuine Isolation Forest inference pipeline (`auth_anomaly_model.pkl`).
 
@@ -46,8 +46,8 @@
 - [x] Deterministic risk engine and Noisy-OR logic.
 - [x] Orchestrator coordinates detectors.
 - [x] SQLite persistence for Incidents.
-- [ ] Implement Alert generation in Orchestrator.
-- [ ] Extract canonical Entities (IPs, Users, etc.) from payloads.
+- [x] Implement Alert generation in Orchestrator.
+- [x] Extract canonical Entities (IPs, Users, etc.) from payloads.
 
 ---
 
@@ -67,5 +67,5 @@
 | **Phase 0** | Baseline & Trust (Tests, DB, Contracts) | **PASSED** |
 | **Phase 1** | Real Intelligence (Phishing, Auth, Media) | **PASSED** |
 | **Phase 2** | SOC Pipeline (Alerts, Persistence) | **PASSED** |
-| **Phase 3** | Differentiation (Correlation, Entity Extr.) | **PENDING** |
-| **Phase 4** | Polish (Model Cards, Real Evaluation, Reset) | **PENDING** |
+| **Phase 3** | Differentiation (Correlation, Entity Extr.) | **PASSED** |
+| **Phase 4** | Polish (Model Cards, Real Evaluation, Reset) | **PASSED** |

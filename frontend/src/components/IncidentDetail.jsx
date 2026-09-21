@@ -96,7 +96,7 @@ export default function IncidentDetail({ incidentId, onBack }) {
                     <span className="text-xs text-slate-400">{ev.contribution > 0 ? '+' : ''}{ev.contribution ? ev.contribution.toFixed(1) : '0.0'} pts</span>
                   </div>
                   <div className="w-full bg-card h-1.5 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(0, (ev.contribution_pct || 0) * 100))}%` }}></div>
+                    <div className="h-full bg-primary" style={{ width: `${Math.min(100, Math.max(0, (ev.contribution_pct || 0)))}%` }}></div>
                   </div>
                   <div className="text-xs text-slate-400 mt-2">{ev.description}</div>
                 </div>

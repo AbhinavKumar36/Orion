@@ -25,8 +25,62 @@ def reset_demo():
     except Exception as e:
         print(f"Failed to initialize database: {e}")
         sys.exit(1)
-        
-    print("Demo reset complete.")
+
+    print("Seeding Threat Constellation...")
+    
+    # We use FastAPI TestClient to simulate HTTP requests to our own API
+    from fastapi.testclient import TestClient
+    from backend.app.main import app
+    
+    client = TestClient(app)
+    
+    # Incident 1: Phishing Email
+    phishing_payload = {
+        "incident_id": "ORN-PHISH-001",
+        "url": "http://secure-login-update-orion.com",
+        "message": {
+            "subject": "Urgent: Update your credentials",
+            "body": "Please click here to update your credentials immediately.",
+            "sender": "admin@it-support-internal.com"
+        },
+        "context": {
+            "recipient": "jdoe@company.com",
+            "source_ip": "192.168.1.100"
+        }
+    }
+    client.post("/api/incidents/analyze/phishing", json=phishing_payload)
+
+    # Incident 2: Authentication Anomaly (Same User, Same IP)
+    auth_payload = {
+        "incident_id": "ORN-AUTH-002",
+        "events": [
+            {"timestamp": "2023-10-27T10:00:00Z", "ip": "192.168.1.100", "user_id": "jdoe@company.com", "event_type": "login_failure"},
+            {"timestamp": "2023-10-27T10:01:00Z", "ip": "192.168.1.100", "user_id": "jdoe@company.com", "event_type": "login_failure"},
+            {"timestamp": "2023-10-27T10:02:00Z", "ip": "192.168.1.100", "user_id": "jdoe@company.com", "event_type": "login_failure"},
+            {"timestamp": "2023-10-27T10:03:00Z", "ip": "192.168.1.100", "user_id": "jdoe@company.com", "event_type": "login_failure"},
+            {"timestamp": "2023-10-27T10:04:00Z", "ip": "192.168.1.100", "user_id": "jdoe@company.com", "event_type": "login_failure"},
+            {"timestamp": "2023-10-27T10:05:00Z", "ip": "192.168.1.100", "user_id": "jdoe@company.com", "event_type": "login_success"}
+        ],
+        "context": {
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+    }
+    client.post("/api/incidents/analyze/authentication", json=auth_payload)
+
+    # Incident 3: System Activity (Same IP)
+    sys_payload = {
+        "incident_id": "ORN-SYS-003",
+        "events": [
+            {"timestamp": "2023-10-27T10:10:00Z", "source": "system_log", "actor": "jdoe@company.com", "process": "powershell.exe", "command_line": "powershell -enc JABz...", "ip": "192.168.1.100"}
+        ],
+        "context": {
+            "hostname": "DESKTOP-JDOE",
+            "source_ip": "192.168.1.100"
+        }
+    }
+    client.post("/api/incidents/analyze/system_activity", json=sys_payload)
+
+    print("Demo reset complete and Constellation seeded.")
 
 if __name__ == "__main__":
     reset_demo()

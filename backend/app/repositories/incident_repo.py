@@ -283,3 +283,32 @@ class IncidentRepository:
             rows = conn.execute("SELECT * FROM alerts ORDER BY created_at DESC LIMIT ? OFFSET ?", (limit, offset)).fetchall()
             return [dict(r) for r in rows]
 
+    def get_correlated_incidents(self, entity_pks: List[int]) -> List[str]:
+        """
+        Given a list of entity_pks, returns a list of incident_ids that share any of these entities.
+        """
+        if not entity_pks:
+            return []
+        
+        placeholders = ",".join("?" for _ in entity_pks)
+        with get_db() as conn:
+            rows = conn.execute(
+                f"SELECT DISTINCT incident_id FROM incident_entities WHERE entity_pk IN ({placeholders})",
+                tuple(entity_pks)
+            ).fetchall()
+            return [r[0] for r in rows]
+
+    def update_correlation_id(self, incident_ids: List[str], correlation_id: str) -> None:
+        """
+        Updates the correlation_id for the given list of incident_ids.
+        """
+        if not incident_ids:
+            return
+            
+        placeholders = ",".join("?" for _ in incident_ids)
+        with get_db() as conn:
+            conn.execute(
+                f"UPDATE incidents SET correlation_id = ? WHERE incident_id IN ({placeholders})",
+                (correlation_id, *incident_ids)
+            )
+

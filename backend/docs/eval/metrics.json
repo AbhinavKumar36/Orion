@@ -1,17 +1,17 @@
 {
   "summary": {
-    "overall_f1": 0.9091,
+    "overall_f1": 1.0,
     "total_samples": 10,
-    "p95_latency_ms": 1.16
+    "p95_latency_ms": 1.19
   },
   "modules": {
     "phishing_text": {
-      "accuracy": 0.9,
-      "precision": 0.8333,
+      "accuracy": 1.0,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.9091,
+      "f1": 1.0,
       "samples": 10,
-      "latency_p95_ms": 1.16
+      "latency_p95_ms": 1.19
     }
   },
   "ablation": {

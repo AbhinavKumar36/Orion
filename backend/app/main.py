@@ -16,6 +16,7 @@ from backend.app.core.database import check_db_health, init_db
 from backend.app.api.endpoints.incidents import router as incidents_router
 from backend.app.api.endpoints.dashboard import router as dashboard_router
 from backend.app.api.endpoints.evaluation import router as evaluation_router
+from backend.app.api.endpoints.intel import router as intel_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,6 +36,7 @@ app = FastAPI(
 
 app.include_router(incidents_router, prefix="/api/incidents", tags=["Incidents"])
 app.include_router(dashboard_router, prefix="/api/dashboard", tags=["Dashboard"])
+app.include_router(intel_router, prefix="/api/threat-intel", tags=["Threat Intelligence"])
 app.include_router(evaluation_router, prefix="/api/demo", tags=["Evaluation & Demo"])
 
 # CORS configuration

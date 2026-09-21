@@ -11,11 +11,20 @@ from backend.app.detectors.authentication.engine import analyze_authentication
 from backend.app.detectors.impersonation.engine import check_impersonation
 from backend.app.detectors.media.engine import analyze_media
 from backend.app.detectors.system_activity.engine import analyze_system_activity
+from backend.app.services.entity_extractor import EntityExtractor
+from backend.app.services.correlation_engine import CorrelationEngine
+from backend.app.models.domain import Entity
 
 router = APIRouter()
 
 def _save_incident_and_alert(repo: IncidentRepository, incident: Incident):
     repo.save_incident(incident)
+    
+    # Trigger correlation engine
+    correlator = CorrelationEngine(repo)
+    correlator.correlate_incident(incident.incident_id)
+
+    # Generate alert if threat
     if incident.assessment == "threat":
         alert_id = f"ALT-{uuid.uuid4().hex[:8].upper()}"
         msg = f"New {incident.severity} threat detected: {incident.threat_type} in module {incident.module.value}"
@@ -67,6 +76,9 @@ def analyze_incident(req: MockAnalyzeRequest):
     """
     incident_id = req.incident_id or f"ORN-DEMO-{uuid.uuid4().hex[:6].upper()}"
     
+    raw_entities = EntityExtractor.extract_from_context(req.module, req.context)
+    entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
+
     orchestrator = Orchestrator()
     try:
         incident = orchestrator.process_mocked_analysis(
@@ -77,7 +89,8 @@ def analyze_incident(req: MockAnalyzeRequest):
             fired_evidence_types=req.fired_evidence_types,
             context=req.context,
             p_model=req.p_model,
-            missing_ratio=req.missing_ratio
+            missing_ratio=req.missing_ratio,
+            entities=entities
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -113,6 +126,9 @@ def analyze_phishing_endpoint(req: PhishingAnalyzeRequest):
     context = req.context.copy()
     context["ml_insights"] = ml_insights
     
+    raw_entities = EntityExtractor.extract_from_context("phishing", context)
+    entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
+    
     orchestrator = Orchestrator()
     try:
         incident = orchestrator.process_mocked_analysis(
@@ -123,7 +139,8 @@ def analyze_phishing_endpoint(req: PhishingAnalyzeRequest):
             fired_evidence_types=fired_evidence_types,
             context=context,
             p_model=p_model,
-            missing_ratio=0.0
+            missing_ratio=0.0,
+            entities=entities
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -148,6 +165,9 @@ def analyze_authentication_endpoint(req: AuthAnalyzeRequest):
     context = req.context.copy()
     context["ml_insights"] = ml_insights
     
+    raw_entities = EntityExtractor.extract_from_context("authentication", context)
+    entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
+    
     orchestrator = Orchestrator()
     try:
         incident = orchestrator.process_mocked_analysis(
@@ -158,7 +178,8 @@ def analyze_authentication_endpoint(req: AuthAnalyzeRequest):
             fired_evidence_types=fired_evidence_types,
             context=context,
             p_model=p_model,
-            missing_ratio=0.0
+            missing_ratio=0.0,
+            entities=entities
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -184,6 +205,9 @@ def analyze_impersonation_endpoint(req: ImpersonationAnalyzeRequest):
     for flag in context_flags:
         context[flag] = True
         
+    raw_entities = EntityExtractor.extract_from_context("impersonation", context)
+    entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
+        
     orchestrator = Orchestrator()
     try:
         incident = orchestrator.process_mocked_analysis(
@@ -194,7 +218,8 @@ def analyze_impersonation_endpoint(req: ImpersonationAnalyzeRequest):
             fired_evidence_types=fired_evidence_types,
             context=context,
             p_model=p_model,
-            missing_ratio=0.0
+            missing_ratio=0.0,
+            entities=entities
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -237,6 +262,9 @@ async def analyze_media_endpoint(
     
     fired_evidence_types, p_model, missing_ratio = analyze_media(asset, context_dict)
     
+    raw_entities = EntityExtractor.extract_from_context("media", context_dict)
+    entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
+    
     orchestrator = Orchestrator()
     try:
         incident = orchestrator.process_mocked_analysis(
@@ -247,7 +275,8 @@ async def analyze_media_endpoint(
             fired_evidence_types=fired_evidence_types,
             context=context_dict,
             p_model=p_model,
-            missing_ratio=missing_ratio
+            missing_ratio=missing_ratio,
+            entities=entities
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -269,6 +298,9 @@ def analyze_system_endpoint(req: SystemAnalyzeRequest):
     
     fired_evidence_types, p_model = analyze_system_activity(req.events)
     
+    raw_entities = EntityExtractor.extract_from_context("system_activity", req.context)
+    entities = [Entity(entity_type=t, value_canonical=v, role="subject", criticality="standard") for t, v in raw_entities]
+    
     orchestrator = Orchestrator()
     try:
         incident = orchestrator.process_mocked_analysis(
@@ -279,7 +311,8 @@ def analyze_system_endpoint(req: SystemAnalyzeRequest):
             fired_evidence_types=fired_evidence_types,
             context=req.context,
             p_model=p_model,
-            missing_ratio=0.0
+            missing_ratio=0.0,
+            entities=entities
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

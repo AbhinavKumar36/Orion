@@ -14,9 +14,9 @@ from backend.app.detectors.phishing.text_classifier import text_classifier
 
 EVAL_DIR = Path("backend/evaluation")
 DATA_DIR = EVAL_DIR / "data"
-METRICS_FILE = EVAL_DIR.parent / "docs" / "eval" / "metrics.json"
-CM_FILE = EVAL_DIR.parent / "docs" / "eval" / "confusion_matrix.png"
-RUN_METADATA_FILE = EVAL_DIR.parent / "docs" / "eval" / "run_metadata.json"
+METRICS_FILE = EVAL_DIR.parent.parent / "docs" / "eval" / "metrics.json"
+CM_FILE = EVAL_DIR.parent.parent / "docs" / "eval" / "confusion_matrix.png"
+RUN_METADATA_FILE = EVAL_DIR.parent.parent / "docs" / "eval" / "run_metadata.json"
 
 def run_evaluation():
     csv_path = DATA_DIR / "phishing_eval.csv"
