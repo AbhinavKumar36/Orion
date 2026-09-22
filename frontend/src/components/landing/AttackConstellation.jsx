@@ -18,7 +18,7 @@ export default function AttackConstellation() {
   });
 
   return (
-    <section ref={containerRef} className="py-32 bg-[#05050A] border-t border-white/5 overflow-hidden">
+    <section ref={containerRef} className="py-32 bg-transparent border-t border-white/5 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         
         <div>

@@ -14,7 +14,7 @@ const STEPS = [
 
 export default function IntelligencePipeline() {
   return (
-    <section id="intelligence" className="py-32 bg-[#05050A] border-t border-white/5 relative">
+    <section id="intelligence" className="py-32 bg-transparent border-t border-white/5 relative">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

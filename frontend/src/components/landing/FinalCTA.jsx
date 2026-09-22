@@ -5,7 +5,7 @@ import { Shield } from 'lucide-react';
 
 export default function FinalCTA() {
   return (
-    <section className="relative py-40 bg-[#05050A] border-t border-white/5 overflow-hidden flex items-center justify-center">
+    <section className="relative py-40 bg-transparent border-t border-white/5 overflow-hidden flex items-center justify-center">
       {/* Background radial gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/20 via-[#05050A] to-[#05050A] pointer-events-none" />
 

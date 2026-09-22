@@ -4,7 +4,7 @@ import { Check, ShieldAlert } from 'lucide-react';
 
 export default function ExplainableThreat() {
   return (
-    <section className="py-32 bg-[#05050A] border-t border-white/5 overflow-hidden">
+    <section className="py-32 bg-transparent border-t border-white/5 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         
         <div className="order-2 lg:order-1 relative">

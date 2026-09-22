@@ -9,7 +9,7 @@ export default function HeroSection() {
   return (
     <section className="relative w-full h-[400vh]">
       {/* Sticky Content Container */}
-      <div className="sticky top-0 w-full h-screen flex items-center px-6 overflow-hidden bg-[#020205]">
+      <div className="sticky top-0 w-full h-screen flex items-center px-6 overflow-hidden bg-transparent">
         
         {/* The 3D Scene - Now scoped entirely to the hero */}
         <div className="absolute inset-0 z-0">

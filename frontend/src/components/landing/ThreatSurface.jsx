@@ -12,7 +12,7 @@ const DOMAINS = [
 
 export default function ThreatSurface() {
   return (
-    <section id="platform" className="relative py-32 bg-[#05050A] overflow-hidden border-t border-white/5">
+    <section id="platform" className="relative py-32 bg-transparent overflow-hidden border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

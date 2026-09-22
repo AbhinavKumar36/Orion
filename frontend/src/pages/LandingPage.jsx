@@ -15,7 +15,10 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="bg-[#05050A] text-white selection:bg-cyan-500/30 font-sans">
+    <div className="bg-[#05050A] text-white selection:bg-cyan-500/30 font-sans min-h-screen relative">
+      {/* Global Star Pattern Background */}
+      <div className="fixed inset-0 pointer-events-none star-pattern z-0" />
+
       <Navigation />
 
       {/* Scrollable DOM Content */}
