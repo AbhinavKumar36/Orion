@@ -1,35 +1,22 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ShieldAlert, Activity, GitCommit, CheckCircle2 } from 'lucide-react';
-
-function HUDElement({ title, status, icon: Icon, delay }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.8 }}
-      className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-lg backdrop-blur-sm shadow-[0_0_15px_rgba(6,182,212,0.1)]"
-    >
-      <div className="text-cyan-400">
-        <Icon className="w-4 h-4" />
-      </div>
-      <div className="flex flex-col">
-        <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400 leading-tight">{title}</span>
-        <span className="text-[10px] font-bold text-white flex items-center gap-2 leading-tight">
-          {status} <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
-        </span>
-      </div>
-    </motion.div>
-  );
-}
+import OrionGlobeScene from './3d/OrionGlobeScene';
 
 export default function HeroSection() {
+  const { scrollYProgress } = useScroll();
+
   return (
-    <section className="relative w-full h-[150vh]">
+    <section className="relative w-full h-[400vh]">
       {/* Sticky Content Container */}
-      <div className="sticky top-0 w-full h-screen flex items-center px-6">
-        <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center pointer-events-none">
+      <div className="sticky top-0 w-full h-screen flex items-center px-6 overflow-hidden bg-[#020205]">
+        
+        {/* The 3D Scene - Now scoped entirely to the hero */}
+        <div className="absolute inset-0 z-0">
+          <OrionGlobeScene />
+        </div>
+
+        <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center pointer-events-none relative z-10">
           
           {/* Left Side: Typography */}
           <div className="w-full md:w-1/2 pt-20">
@@ -60,7 +47,7 @@ export default function HeroSection() {
               transition={{ duration: 1, delay: 0.4 }}
               className="text-2xl md:text-3xl text-slate-300 font-light mb-8"
             >
-              From Digital Signals to Actionable Threats.
+              From Digital Signals<br />to Actionable Threats.
             </motion.h2>
 
             <motion.p
@@ -92,24 +79,37 @@ export default function HeroSection() {
               </a>
             </motion.div>
 
-            {/* Bottom HUD Bar (Option A from prompt) */}
-            <div className="flex flex-wrap gap-4 mt-8 pointer-events-none">
-              <HUDElement title="THREAT SIGNALS" status="ACTIVE" icon={Activity} delay={1.2} />
-              <HUDElement title="INTELLIGENCE" status="ONLINE" icon={GitCommit} delay={1.4} />
-              <HUDElement title="CORRELATION" status="READY" icon={CheckCircle2} delay={1.6} />
-              <HUDElement title="RISK ENGINE" status="READY" icon={ShieldAlert} delay={1.8} />
-            </div>
+            {/* Bottom HUD Bar (Compact Status Strip) */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 1.0 }}
+              className="inline-flex items-center gap-8 bg-white/5 border border-white/10 px-6 py-3 rounded-lg backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.1)] pointer-events-none"
+            >
+              {[
+                { label: 'SIGNALS', status: 'ACTIVE' },
+                { label: 'INTELLIGENCE', status: 'ONLINE' },
+                { label: 'CORRELATION', status: 'READY' },
+                { label: 'RISK ENGINE', status: 'READY' }
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col">
+                  <span className="text-[10px] uppercase font-mono text-slate-500 tracking-widest mb-1">{item.label}</span>
+                  <span className="text-xs font-bold text-white flex items-center gap-2">
+                    {item.status} <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  </span>
+                </div>
+              ))}
+            </motion.div>
           </div>
           
-          {/* Right Side: Empty to allow the fixed 3D Globe to show clearly */}
+          {/* Right Side: Intentionally left blank for 3D Earth composition */}
           <div className="w-full md:w-1/2 hidden md:block">
-             {/* Intentionally left blank for 3D Earth composition */}
           </div>
         </div>
+        
+        {/* Gradient transition masking the bottom of the sticky view */}
+        <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-[#05050A] to-transparent pointer-events-none z-10" />
       </div>
-      
-      {/* Gradient transition to next section */}
-      <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-[#05050A] to-transparent pointer-events-none" />
     </section>
   );
 }

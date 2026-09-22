@@ -1,883 +1,1096 @@
-# ORION — LANDING PAGE VISUAL REWORK
-## Transform the existing landing page into an immersive 3D intelligence experience
+# ORION — DEFINITIVE PHASE 1 HERO REDESIGN
+## Build an immersive 3D cyber-intelligence experience
+## Inspired by the storytelling quality of our VEILLE landing page,
+## but DO NOT copy VEILLE's design, assets, content, or layout.
 
-You are working on the EXISTING ORION landing page.
+============================================================
+0. CONTEXT
+============================================================
 
-The current implementation already has:
+You are working inside the existing ORION repository.
 
-- ORION navigation
-- hero typography
-- tagline
-- description
-- CTA buttons
-- status HUD cards
-- dark visual theme
+ORION is:
 
-DO NOT throw away the existing page.
+AI-POWERED CYBER THREAT INTELLIGENCE & DIGITAL TRUST PLATFORM
 
-We are now changing the visual concept of the landing page.
+Tagline:
 
-The current page is too empty on the right side and feels like a conventional SaaS landing page.
+FROM DIGITAL SIGNALS TO ACTIONABLE THREATS.
 
-We want to transform it into an immersive, cinematic, scroll-driven 3D cybersecurity intelligence experience.
+The current landing page has already gone through several iterations.
 
-==================================================
-1. CORE CONCEPT
-==================================================
+The latest iteration is NOT acceptable.
 
-The landing page should tell a visual story:
+It currently looks like:
 
-OBSERVE
-   ↓
-DETECT
-   ↓
-CONNECT
-   ↓
-CORRELATE
-   ↓
-UNDERSTAND
-   ↓
-RESPOND
+- a normal SaaS hero
+- with a giant glowing cyan sphere
+- with text beside it
+- with decorative network effects
 
-The central visual metaphor is:
+That is NOT the target.
 
-A 3D Earth / globe representing the digital environment.
+We need to redesign the HERO EXPERIENCE around a cinematic,
+interactive 3D intelligence environment.
 
-As the user scrolls:
+The inspiration is the QUALITY OF EXPERIENCE we previously achieved
+with the VEILLE landing page:
 
-1. The camera slowly approaches the globe.
-2. Digital signal points begin appearing.
-3. Individual points begin glowing.
-4. Signals connect to each other.
-5. Related signals form networks.
-6. The network becomes increasingly complex.
-7. The globe gradually becomes less important.
-8. The intelligence network becomes the dominant visual.
-9. The scene transitions naturally into ORION's intelligence pipeline.
+- cinematic 3D storytelling
+- environment-driven information
+- spatial data visualization
+- progressive discovery
+- scroll-controlled transformation
+- restrained glass UI
+- premium dark visual language
+- strong negative space
+- the 3D visualization actually explains the product
 
-The scroll itself should feel like the user is progressively entering ORION's intelligence system.
+However:
 
-This is the most important visual concept of the entire landing page.
+DO NOT COPY VEILLE.
 
-==================================================
-2. IMPORTANT — DO NOT MAKE IT A GENERIC GLOBE
-==================================================
+Do not copy:
+- its exact globe
+- its exact UI
+- its exact colors
+- its exact animations
+- its exact layout
+- its exact content
+- its exact visual objects
 
-Do NOT simply place a rotating Earth on the right side.
+ORION must have its OWN visual identity.
 
-The globe must communicate:
+============================================================
+1. CORE DESIGN PHILOSOPHY
+============================================================
 
-DIGITAL SIGNALS
-+
-RELATIONSHIPS
-+
-CORRELATION
-+
-THREAT INTELLIGENCE
+VEILLE's philosophy was:
 
-The Earth is the substrate.
+THE VISUALIZATION IS PART OF THE EXPLANATION.
 
-The network is the story.
+ORION should take that further:
 
-The intelligence relationships are the hero.
+THE THREAT NETWORK IS THE EXPLANATION.
 
-==================================================
-3. 3D TECHNOLOGY
-==================================================
+The user should understand ORION by watching the environment transform.
 
-Use the project's existing technology where possible.
+The experience should communicate:
 
-If suitable, use:
-
-Three.js
-React Three Fiber
-@react-three/drei
-
-Do not add unnecessary dependencies.
-
-Before adding dependencies, inspect package.json and determine what is already available.
-
-The 3D scene must be implemented as a proper reusable component rather than being embedded into one giant page component.
-
-Suggested conceptual architecture:
-
-LandingPage
- ├── Navigation
- ├── Hero
- │    ├── HeroContent
- │    ├── OrionGlobeScene
- │    └── StatusHUD
- ├── ThreatSurfaceSection
- ├── IntelligencePipelineSection
- ├── PlatformSurfacesSection
- └── FinalCTA
-
-Adapt this to the repository's existing architecture.
-
-==================================================
-4. HERO — KEEP THE EXISTING CONTENT
-==================================================
-
-Preserve the current strong content hierarchy.
-
-Keep:
-
-AI-POWERED CYBER THREAT INTELLIGENCE
-
-ORION
-
-From Digital Signals to Actionable Threats.
-
-Existing supporting description.
-
-Primary CTA:
-
-ENTER ORION
-
-Secondary CTA:
-
-EXPLORE INTELLIGENCE
-
-Do not unnecessarily rewrite the copy.
-
-Improve the visual composition around it.
-
-==================================================
-5. HERO COMPOSITION
-==================================================
-
-Current problem:
-
-The right side of the hero is almost completely empty.
-
-Replace that empty area with the 3D intelligence globe.
-
-Desktop composition:
-
-LEFT:
-
-ORION
-headline
-description
-CTA
-
-RIGHT:
-
-large 3D Earth / intelligence globe
-
-The globe should occupy approximately 45–55% of the visual hero area.
-
-It should extend slightly beyond the normal content container to create depth.
-
-Do not allow it to overlap or destroy the readability of the hero text.
-
-==================================================
-6. THE GLOBE
-==================================================
-
-Create a stylized technical Earth.
-
-Visual characteristics:
-
-- dark Earth surface
-- subtle illuminated continents
-- cyan/blue atmospheric rim
-- subtle grid/longitude/latitude geometry
-- faint glow
-- sparse technical particles
-- subtle stars/background particles
-- no photorealistic Google Earth appearance
-
-The globe should look like:
-
-CYBER INTELLIGENCE VISUALIZATION
-
-not:
-
-SPACE WEBSITE
-
-Do NOT use an excessive space aesthetic.
-
-Cybersecurity remains the dominant identity.
-
-==================================================
-7. DIGITAL SIGNAL NODES
-==================================================
-
-Place points around the globe.
-
-These represent abstract digital signals.
-
-Potential categories:
-
-PHISHING
-WEBSITE
-IDENTITY
-MEDIA
-AUTHENTICATION
-TECHNICAL
-
-Do not imply these are actual live global incidents.
-
-They are visual representations of ORION's signal domains.
-
-At initial page load:
-
-Only a SMALL number of nodes should be visible.
-
-For example:
-
-3–5 primary nodes.
-
-The globe should feel relatively quiet.
-
-==================================================
-8. SCROLL-DRIVEN STORY
-==================================================
-
-THIS IS THE MOST IMPORTANT IMPLEMENTATION.
-
-The 3D scene must react to page scroll.
-
-Do NOT simply animate the globe continuously regardless of scrolling.
-
-Scroll progress should drive the main camera and network state.
-
-Conceptually:
-
-scrollProgress = 0
-    ↓
-camera far
-few nodes
-minimal connections
-
-scrollProgress = 0.25
-    ↓
-camera closer
-more nodes
-first connections appear
-
-scrollProgress = 0.50
-    ↓
-camera closer
-network expands
-more relationships become visible
-
-scrollProgress = 0.75
-    ↓
-camera enters the network
-connections become dominant
-globe fades into background
-
-scrollProgress = 1
-    ↓
-network resolves into ORION intelligence pipeline
-
-Use smooth interpolation.
-
-Avoid sudden jumps.
-
-==================================================
-9. CAMERA MOVEMENT
-==================================================
-
-At the top:
-
-Camera is relatively far from the globe.
-
-As the user scrolls:
-
-Camera gradually approaches.
-
-The camera should not simply move directly forward.
-
-Add subtle controlled lateral/orbital movement.
-
-For example:
-
-- slight horizontal shift
-- subtle rotation
-- small parallax
-- controlled orbital movement
-
-The effect should feel cinematic.
-
-NOT like a game camera.
-
-Do not make users dizzy.
-
-==================================================
-10. NODE ACTIVATION
-==================================================
-
-Nodes should progressively activate as the user scrolls.
-
-Example:
-
-STAGE 1:
-
-●      ●
-    🌍
-       ●
-
-STAGE 2:
-
-●────●
- \   |
-  \ 🌍
-   \ |
-    ●
-
-STAGE 3:
-
-●────●────●
-│  ╲ │ ╱  │
-│   ╲│╱   │
-●────●────●
-
-The connections should be animated.
-
-Do not reveal all connections at once.
-
-==================================================
-11. CONNECTION ANIMATION
-==================================================
-
-Connections should look like information travelling between signals.
-
-Use:
-
-- curved arcs
-- thin glowing lines
-- particles travelling along lines
-- occasional pulses
-
-Example:
-
-NODE A ●───────→● NODE B
-
-A small light particle travels from A to B.
-
-The movement should be subtle.
-
-Avoid making every line continuously animated.
-
-That would become visual noise.
-
-==================================================
-12. INTELLIGENCE LABELS
-==================================================
-
-Use only a few labels around the globe.
-
-Examples:
-
-PHISHING SIGNAL
-WEBSITE RISK
-IDENTITY SIGNAL
-MEDIA SIGNAL
-AUTH ANOMALY
-
-These should appear progressively.
-
-Use small glass/HUD panels.
-
-Important:
-
-Do NOT surround the globe with 10–15 floating cards.
-
-Maximum approximately 3–5 visible at a time.
-
-The globe itself should remain the main visual.
-
-==================================================
-13. HERO STATUS HUD
-==================================================
-
-The existing right-side status cards currently show:
-
-THREAT SIGNALS
-ACTIVE
-
-INTELLIGENCE
-ONLINE
-
-CORRELATION
-READY
-
-RISK ENGINE
-READY
-
-These currently compete with the empty space.
-
-Integrate them into the new composition.
-
-Possible approaches:
-
-A. Move them below the hero/globe as a compact intelligence status bar.
-
-OR
-
-B. Turn them into subtle floating HUD elements around the scene.
-
-Prefer option A if floating elements make the globe too cluttered.
-
-They should not compete with the globe.
-
-==================================================
-14. SCROLL SECTION TRANSITION
-==================================================
-
-The hero should be intentionally taller than one viewport.
-
-The globe should remain visually present while the user scrolls.
-
-Do NOT make the globe disappear immediately after the first viewport.
-
-Use a sticky/pinned 3D scene if appropriate.
-
-Concept:
-
-------------------------------------------------
- HERO TEXT
-              3D GLOBE
-              ↓
-          user scrolls
-              ↓
-       camera approaches
-              ↓
-      network expands
-              ↓
-     intelligence emerges
-------------------------------------------------
-
-The exact implementation is up to you.
-
-The result must feel smooth and cinematic.
-
-==================================================
-15. STAGE 1 — OBSERVE
-==================================================
-
-Initial state.
-
-Visual:
-
-Dark environment.
-
-Globe relatively distant.
-
-Only a few signal points.
-
-Minimal network connections.
-
-Text near the globe:
-
-OBSERVE
-
-Small supporting text:
-
-"Digital signals emerge across the threat surface."
-
-Do not overload the screen.
-
-==================================================
-16. STAGE 2 — DETECT
-==================================================
-
-As the user scrolls:
-
-New points appear.
-
-One or two nodes pulse.
-
-A signal path becomes visible.
-
-Show subtle labels:
-
-PHISHING
-WEBSITE
-IDENTITY
-
-The camera moves closer.
-
-==================================================
-17. STAGE 3 — CORRELATE
-==================================================
-
-Continue scrolling.
-
-Multiple nodes connect.
-
-The network becomes visibly more complex.
-
-The important visual idea:
-
-Previously independent signals are now related.
-
-Possible text:
-
-"Isolated signals become meaningful when connected."
-
-This is one of ORION's key concepts.
-
-==================================================
-18. STAGE 4 — UNDERSTAND
-==================================================
-
-The camera is now significantly closer.
-
-The globe is no longer the primary subject.
-
-The connected intelligence network is.
-
-Introduce subtle HUD information:
-
+DIGITAL SIGNAL
+      ↓
+DETECTION
+      ↓
 EVIDENCE
-
+      ↓
 RISK
-
+      ↓
 RELATIONSHIP
-
+      ↓
 EXPLANATION
-
-These should appear around the network.
-
-The visual hierarchy becomes:
-
-NETWORK > GLOBE
-
-==================================================
-19. STAGE 5 — RESPONSE
-==================================================
-
-The network resolves into a clear flow:
-
-SIGNAL
-   ↓
-EVIDENCE
-   ↓
-RISK
-   ↓
-RELATIONSHIP
-   ↓
+      ↓
 RESPONSE
 
-This becomes the transition into the next landing-page section.
+without requiring the user to read a wall of text.
 
-The globe can now fade significantly into the background.
-
-==================================================
-20. DO NOT CLAIM LIVE GLOBAL THREAT DATA
-==================================================
-
-This is critical.
-
-The globe must NOT imply:
-
-- ORION currently monitors the entire internet
-- ORION currently detects global attacks
-- ORION has real-time global telemetry
-- displayed points represent real attacks
-
-The globe is a visualization of ORION's intelligence model.
-
-If labels are necessary, use:
-
-"ILLUSTRATIVE SIGNAL NETWORK"
-
-or equivalent subtle wording.
-
-Do not make the interface dishonest.
-
-==================================================
-21. BACKGROUND
-==================================================
-
-Keep the background dark.
-
-But do NOT make it completely flat black.
-
-Introduce subtle depth:
-
-- very faint gradient
-- technical grid
-- sparse particles
-- soft atmospheric glow around the globe
-- subtle radial illumination
-
-The background should remain dark enough that the globe becomes the visual anchor.
-
-Avoid large bright gradients.
-
-==================================================
-22. MOUSE INTERACTION
-==================================================
-
-Add subtle mouse interaction.
-
-The globe should respond slightly to cursor movement.
-
-Examples:
-
-- tiny camera parallax
-- slight globe rotation influence
-- subtle node depth shift
-
-Do not make the entire page move dramatically.
-
-The user should feel depth without losing stability.
-
-==================================================
-23. REDUCED MOTION
-==================================================
-
-Support:
-
-prefers-reduced-motion
-
-When enabled:
-
-- disable camera travel
-- disable particle travel
-- reduce globe rotation
-- remove aggressive transitions
-- preserve static network visualization
-- preserve all content
-
-The page must remain understandable.
-
-==================================================
-24. MOBILE
-==================================================
-
-Do NOT attempt to render the full desktop scene on mobile.
-
-On mobile:
-
-- reduce globe size
-- reduce node count
-- reduce particle count
-- simplify connection network
-- reduce camera movement
-- keep text readable
-- prevent horizontal overflow
-
-The globe remains important but must not destroy usability.
-
-==================================================
-25. PERFORMANCE
-==================================================
-
-The 3D scene must be GPU-conscious.
-
-Avoid:
-
-- enormous textures
-- massive particle systems
-- high-poly Earth models
-- expensive post-processing everywhere
-- unnecessary React state updates
-- continuous expensive calculations
-
-Use procedural/lightweight geometry where practical.
-
-Use animation frames efficiently.
-
-Do not sacrifice page usability for visual effects.
-
-==================================================
-26. EXISTING DESIGN LANGUAGE
-==================================================
-
-Preserve the good parts of the current design:
-
-- ORION branding
-- typography
-- cyan accent
-- dark enterprise aesthetic
-- navigation
-- CTA styling
-- glass/HUD language
-
-The goal is:
-
-CURRENT DESIGN
-+
-3D GLOBE
-+
-SCROLL-DRIVEN INTELLIGENCE
-+
-CINEMATIC MOTION
-
-NOT:
-
-completely different website.
-
-==================================================
-27. LANDING PAGE SECTIONS AFTER HERO
-==================================================
-
-After the globe experience, continue into the existing planned sections.
-
-At minimum maintain/create:
-
-1. Threat Surface
-2. Intelligence Pipeline
-3. Multi-Surface Platform
-4. Attack Constellation
-5. Explainable Threat Intelligence
-6. Final CTA
-
-The globe should transition naturally into these sections.
-
-==================================================
-28. CRITICAL VISUAL PRINCIPLE
-==================================================
-
-The page should visually evolve:
-
-EMPTY / QUIET
-
-        ↓
-
-GLOBE
-
-        ↓
-
-SIGNALS
-
-        ↓
-
-CONNECTIONS
-
-        ↓
-
-NETWORK
-
-        ↓
-
-INTELLIGENCE
-
-        ↓
-
-ACTION
-
-That transformation is the actual animation.
-
-Do not rely on random decorative animation.
-
-==================================================
-29. CODE QUALITY
-==================================================
-
-Before modifying:
-
-Inspect the current implementation.
-
-Do not rewrite unrelated code.
-
-Do not break:
-
-- existing routes
-- Web Console
-- APIs
-- authentication
-- backend
-- existing functionality
-
-Keep 3D code isolated and maintainable.
-
-Do not create duplicate components.
-
-Do not introduce unnecessary libraries.
-
-==================================================
-30. VALIDATION
-==================================================
-
-After implementation:
-
-Run the appropriate existing:
-
-- npm build
-- lint
-- typecheck
-
-and verify:
-
-- landing page loads
-- globe renders
-- scroll interaction works
-- camera animation works
-- nodes appear progressively
-- connections animate
-- CTAs work
-- Web Console route still works
-- mobile layout works
-- no horizontal overflow
-- no console errors
-- reduced-motion mode works
-- performance remains reasonable
-
-Do NOT claim success without actually checking.
-
-==================================================
-31. FINAL OUTPUT FROM YOU
-==================================================
-
-When finished, report:
-
-1. Files changed
-2. Dependencies added
-3. 3D implementation approach
-4. Scroll implementation approach
-5. Sections changed
-6. Build result
-7. Lint/typecheck result
-8. Any known issues
-9. Screenshots if available
-
-Do NOT start Phase 2.
-
-STOP after Phase 1 landing page rework.
-
-==================================================
-FINAL PRODUCT FEEL
-==================================================
-
-The visitor should feel:
+The page should feel like:
 
 "I am entering an intelligence system."
 
 Not:
 
-"I am looking at another SaaS landing page."
+"I am viewing a website with a 3D background."
 
-The signature experience should be:
+============================================================
+2. DO NOT START WITH THE GLOBE
+============================================================
 
-A dark Earth.
+The biggest mistake in the previous implementation was treating:
 
-A few quiet signals.
+"3D globe"
 
-Scroll.
+as the feature.
 
-The camera moves closer.
+The feature is:
 
-A point illuminates.
+"progressive cyber-intelligence visualization."
 
-Another responds.
+The globe is only the initial environment.
 
-A connection forms.
+The real subject is the intelligence emerging around it.
 
-More signals emerge.
+The visual story is:
 
-The network grows.
+QUIET DIGITAL WORLD
+        ↓
+SIGNALS
+        ↓
+SIGNAL RELATIONSHIPS
+        ↓
+THREAT NETWORK
+        ↓
+EVIDENCE
+        ↓
+RISK
+        ↓
+ACTION
 
-The Earth becomes secondary.
+============================================================
+3. INITIAL HERO STATE
+============================================================
 
-The relationships become visible.
+At page load, the scene should be calm.
 
-ORION reveals the threat story.
+Background:
 
-That is the landing page.
+- near-black
+- extremely subtle navy atmosphere
+- very sparse particles
+- subtle depth
+- no giant gradients
+- no excessive neon
+
+A dark technical Earth is visible on the RIGHT.
+
+The Earth should NOT be bright cyan.
+
+The Earth should be:
+
+- dark navy/black
+- recognizable
+- subtly illuminated
+- atmospheric
+- technical
+- sophisticated
+
+Only a few small points of light should be visible.
+
+Think:
+
+A security analyst has just opened ORION.
+
+The system is observing.
+
+Nothing is screaming for attention yet.
+
+============================================================
+4. EARTH
+============================================================
+
+Create a convincing stylized Earth.
+
+It must be immediately recognizable as Earth.
+
+Required:
+
+- visible continent silhouettes
+- dark surface
+- subtle topographic/geographic detail
+- subtle latitude/longitude or technical grid
+- atmospheric rim
+- very restrained blue/cyan illumination
+- dark oceans
+- subtle city/signal lights if useful
+
+DO NOT create:
+
+- solid cyan sphere
+- glowing energy ball
+- wireframe-only planet
+- giant neon planet
+- gaming-style planet
+- excessive bloom
+
+The Earth should be visually sophisticated enough that a screenshot
+could plausibly belong to a professional cyber-intelligence platform.
+
+Photorealism is NOT required.
+
+Recognition + atmosphere + technical detail are more important.
+
+============================================================
+5. HERO COMPOSITION
+============================================================
+
+Desktop:
+
+LEFT:
+ORION branding/content
+
+RIGHT:
+3D Earth + intelligence environment
+
+Maintain strong negative space.
+
+The globe must NEVER overlap:
+
+- ORION title
+- tagline
+- description
+- ENTER ORION
+- EXPLORE INTELLIGENCE
+
+The composition should feel deliberately designed.
+
+Do not make the Earth so large that it becomes the only thing visible.
+
+Do not make it so small that it becomes decorative.
+
+Target:
+
+Earth occupies approximately 40–50% of the visual hero area.
+
+============================================================
+6. ORION HERO COPY
+============================================================
+
+Keep the current strong hierarchy.
+
+Eyebrow:
+
+AI-POWERED CYBER THREAT INTELLIGENCE
+
+Title:
+
+ORION
+
+Tagline:
+
+From Digital Signals
+to Actionable Threats.
+
+Supporting description:
+
+ORION unifies digital signals across phishing, websites, identity,
+media and authentication into explainable threat intelligence.
+
+Primary:
+
+ENTER ORION
+
+Secondary:
+
+EXPLORE INTELLIGENCE
+
+Do not make the copy overly long.
+
+The 3D scene should carry much of the explanation.
+
+============================================================
+7. STAGE ONE — OBSERVE
+============================================================
+
+Initial state.
+
+The Earth is distant.
+
+Only 3–5 signal points exist.
+
+Each point is:
+
+- tiny
+- white/cyan
+- soft halo
+- geographically positioned
+
+No huge HUD cards.
+
+No giant network.
+
+No visual chaos.
+
+The environment should feel alive but quiet.
+
+A subtle label may appear:
+
+DIGITAL SIGNALS
+
+or:
+
+OBSERVING THREAT SURFACE
+
+============================================================
+8. SCROLL — ENTER THE WORLD
+============================================================
+
+Scrolling should NOT simply move the webpage past a static globe.
+
+The hero should behave like an immersive scene.
+
+As the user scrolls:
+
+THE CAMERA MOVES.
+
+The user feels like they are approaching the intelligence environment.
+
+Camera movement:
+
+- slow
+- smooth
+- controlled
+- slightly cinematic
+- subtle parallax
+- no nausea
+- no sudden jumps
+
+The Earth gradually becomes larger.
+
+The user is effectively entering ORION's view of the digital world.
+
+============================================================
+9. STAGE TWO — DETECT
+============================================================
+
+As the camera approaches:
+
+One signal activates.
+
+It emits a subtle pulse.
+
+A small HUD card appears.
+
+Example:
+
+PHISHING
+
+Suspicious Communication
+
+Then another signal:
+
+WEBSITE
+
+Malicious Domain
+
+The cards should feel spatially attached to the 3D scene.
+
+They are NOT ordinary website cards.
+
+They should feel like intelligence annotations.
+
+Use:
+
+- dark translucent glass
+- very thin borders
+- restrained cyan
+- white typography
+- subtle blur
+- small technical icon
+
+Do not create giant cards.
+
+============================================================
+10. STAGE THREE — CONNECT
+============================================================
+
+Now something important happens.
+
+The PHISHING signal connects to WEBSITE.
+
+The connection should:
+
+1. appear gradually
+2. illuminate
+3. carry a tiny travelling signal particle
+4. settle into a subtle persistent line
+
+The user visually understands:
+
+These are not independent events.
+
+They are related.
+
+The experience should feel almost investigative.
+
+============================================================
+11. STAGE FOUR — CORRELATE
+============================================================
+
+Continue scrolling.
+
+Activate:
+
+IDENTITY
+
+Then:
+
+AUTHENTICATION
+
+Then optionally:
+
+MEDIA
+
+and:
+
+TECHNICAL
+
+The network progressively forms.
+
+Use deliberate relationships.
+
+For example:
+
+PHISHING
+    │
+    ▼
+WEBSITE
+    │
+    ▼
+IDENTITY
+    │
+    ▼
+AUTHENTICATION
+
+And:
+
+MEDIA → IDENTITY
+
+TECHNICAL → AUTHENTICATION
+
+Do NOT randomly connect everything.
+
+DO NOT use Math.random() to generate relationships.
+
+Every connection should have a conceptual purpose.
+
+============================================================
+12. GEOGRAPHIC INTELLIGENCE
+============================================================
+
+The signal points should be positioned ON the Earth.
+
+Use a small number of illustrative locations.
+
+Examples:
+
+- North America
+- Europe
+- India / South Asia
+- East Asia
+- Southeast Asia
+
+These are visualization points.
+
+They are NOT claims about real attacks.
+
+Do not display fake real-time attack statistics.
+
+Do not imply that ORION is currently monitoring the entire world.
+
+The globe is a representation of the digital threat surface.
+
+============================================================
+13. THE EARTH SHOULD EVENTUALLY BECOME SECONDARY
+============================================================
+
+This is extremely important.
+
+At the beginning:
+
+EARTH > NETWORK
+
+As the user scrolls:
+
+EARTH = NETWORK
+
+Later:
+
+NETWORK > EARTH
+
+Eventually:
+
+The Earth becomes a subtle background/context.
+
+The intelligence relationships become the primary visual.
+
+This creates the feeling that the user has moved:
+
+FROM THE WORLD
+INTO THE SIGNALS
+INTO THE RELATIONSHIPS
+
+============================================================
+14. STAGE FIVE — EVIDENCE
+============================================================
+
+Once the network is established, introduce evidence.
+
+A small intelligence panel can appear.
+
+Example:
+
+THREAT SIGNAL
+
+PHISHING
+
+Evidence:
+
+• suspicious URL structure
+• impersonated identity
+• credential-oriented behavior
+
+Keep it visually minimal.
+
+Do not create a giant dashboard.
+
+This is a cinematic preview of ORION's explainability.
+
+============================================================
+15. STAGE SIX — RISK
+============================================================
+
+The connected network should then produce a subtle risk visualization.
+
+Example:
+
+RISK ASSESSMENT
+
+HIGH
+
+Risk Score
+78
+
+The number should be clearly presented as:
+
+ILLUSTRATIVE
+
+or otherwise avoid implying live backend data.
+
+The point is to visually communicate:
+
+SIGNALS → EVIDENCE → RISK
+
+============================================================
+16. STAGE SEVEN — RESPONSE
+============================================================
+
+At the end of the hero sequence, the intelligence network should
+resolve into a clean conceptual flow:
+
+SIGNAL
+    ↓
+EVIDENCE
+    ↓
+RISK
+    ↓
+RELATIONSHIP
+    ↓
+RESPONSE
+
+This should become the visual bridge into the next landing section.
+
+============================================================
+17. DO NOT KEEP THE 3D SCENE BEHIND THE ENTIRE WEBSITE
+============================================================
+
+The current implementation mounts OrionGlobeScene as:
+
+fixed inset-0
+
+behind the entire landing page.
+
+Do NOT continue this architecture if it causes the 3D scene to remain
+a generic background throughout the entire page.
+
+The 3D hero experience should be intentionally scoped to the hero
+story.
+
+The scene can be sticky during the hero's scroll narrative.
+
+Once the hero story completes:
+
+transition naturally into normal HTML/React landing sections.
+
+The 3D scene should have a clear beginning, evolution, and conclusion.
+
+============================================================
+18. NETWORK VISUAL LANGUAGE
+============================================================
+
+Connections should be:
+
+- thin
+- elegant
+- slightly curved
+- luminous but restrained
+- dark enough to preserve hierarchy
+
+Use white for important signal events.
+
+Use cyan/blue for intelligence relationships.
+
+Avoid:
+
+- thick neon beams
+- laser effects
+- giant glowing tubes
+- excessive particles
+
+The network should feel analytical, not magical.
+
+============================================================
+19. WHITE SIGNALS ARE IMPORTANT
+============================================================
+
+Use white or near-white points as the highest-contrast signal events.
+
+This is intentional.
+
+Visual hierarchy:
+
+WHITE
+= active signal / important event
+
+CYAN
+= intelligence / connection
+
+DARK BLUE
+= environment
+
+WHITE TEXT
+= primary information
+
+This should give the scene a sophisticated security-platform appearance.
+
+============================================================
+20. ATMOSPHERE
+============================================================
+
+Use depth carefully.
+
+Possible:
+
+- subtle fog
+- atmospheric scattering
+- soft rim light
+- very light volumetric effect
+- sparse particles
+- subtle depth-of-field if performance permits
+
+Do not overdo post-processing.
+
+The scene should remain crisp.
+
+============================================================
+21. MOUSE INTERACTION
+============================================================
+
+Add subtle cursor interaction.
+
+Examples:
+
+- Earth rotates slightly in response
+- camera shifts by a few pixels
+- signal points have tiny parallax
+- nearby HUD annotation reacts subtly
+
+Do NOT make the entire scene follow the mouse aggressively.
+
+============================================================
+22. SCROLL + MOUSE MUST WORK TOGETHER
+============================================================
+
+Scroll controls:
+
+THE STORY.
+
+Mouse controls:
+
+THE DEPTH.
+
+They should not fight each other.
+
+Scroll determines:
+
+- camera distance
+- network reveal
+- signal activation
+- connection activation
+- Earth/network transition
+
+Mouse determines:
+
+- subtle parallax
+- small perspective adjustment
+
+============================================================
+23. VISUAL STORY SHOULD WORK WITHOUT TEXT
+============================================================
+
+This is a major acceptance criterion.
+
+Imagine temporarily removing all HTML copy.
+
+The 3D scene should still communicate:
+
+WORLD
+→ SIGNALS
+→ CONNECTIONS
+→ NETWORK
+→ THREAT
+→ INTELLIGENCE
+
+If the answer is no, the visualization needs improvement.
+
+============================================================
+24. HUD DISCIPLINE
+============================================================
+
+Use fewer HUD elements than the current implementation.
+
+Do NOT surround the globe with:
+
+10+ cards
+status panels
+random labels
+random counters
+
+At any one moment:
+
+approximately 1–3 important annotations.
+
+They should appear because something happened in the scene.
+
+Example:
+
+signal activates
+→ annotation appears.
+
+connection forms
+→ relationship label appears.
+
+risk emerges
+→ risk panel appears.
+
+The UI should feel reactive to the intelligence.
+
+============================================================
+25. CURRENT STATUS BAR
+============================================================
+
+The current:
+
+SIGNALS
+INTELLIGENCE
+CORRELATION
+RISK ENGINE
+
+status strip can remain, but make it much more subtle.
+
+It should NOT compete with:
+
+ORION
+Earth
+network
+
+Use it as a small system-state element.
+
+============================================================
+26. PERFORMANCE
+============================================================
+
+The experience must remain smooth on an ordinary laptop.
+
+Use:
+
+- one primary WebGL canvas
+- efficient geometry
+- limited particles
+- moderate Earth geometry
+- optimized materials
+- deterministic node data
+- efficient animation loop
+- minimal React re-renders
+
+Avoid:
+
+- thousands of animated meshes
+- enormous textures
+- expensive post-processing chains
+- unnecessary physics
+- multiple WebGL canvases
+
+The visual quality should come from:
+
+composition
+lighting
+depth
+animation
+information design
+
+NOT brute-force GPU usage.
+
+============================================================
+27. RESPONSIVE EXPERIENCE
+============================================================
+
+Desktop is the cinematic showcase.
+
+Tablet:
+
+- reduce globe size
+- reduce node count
+- reduce HUD
+- simplify network
+
+Mobile:
+
+- preserve the story
+- simplify the 3D scene substantially
+- keep text readable
+- maintain CTA usability
+- prevent horizontal overflow
+
+If WebGL is unavailable:
+
+provide a graceful static fallback.
+
+============================================================
+28. REDUCED MOTION
+============================================================
+
+Respect:
+
+prefers-reduced-motion
+
+Reduced motion should:
+
+- disable major camera travel
+- reduce globe rotation
+- disable travelling particles
+- simplify transitions
+
+But preserve:
+
+- Earth
+- signals
+- relationships
+- content
+- CTA
+
+============================================================
+29. TECHNICAL ARCHITECTURE
+============================================================
+
+Use the existing stack.
+
+Do not introduce a new framework.
+
+Existing relevant components can be refactored:
+
+LandingPage
+HeroSection
+OrionGlobeScene
+
+You may create focused components such as:
+
+OrionEarth
+SignalNodes
+ThreatConnections
+IntelligenceAnnotations
+HeroTimeline
+
+if useful.
+
+Do not create a monolithic component.
+
+============================================================
+30. DETERMINISTIC DATA
+============================================================
+
+Do NOT use Math.random() for:
+
+- network relationships
+- signal locations
+- threat topology
+- animation stages
+
+Use explicit deterministic configuration.
+
+For example:
+
+const intelligenceGraph = {
+  nodes: [...],
+  relationships: [...]
+}
+
+This makes the experience reproducible and maintainable.
+
+============================================================
+31. PRODUCT HONESTY
+============================================================
+
+The landing page may demonstrate the ORION concept.
+
+But it must NOT falsely claim:
+
+- global live threat monitoring
+- real-time worldwide attack detection
+- perfect deepfake detection
+- autonomous device surveillance
+- guaranteed protection
+- real attack locations
+
+Illustrative data must remain clearly illustrative.
+
+============================================================
+32. EXISTING PRODUCT ROUTES
+============================================================
+
+Keep:
+
+ENTER ORION → /console
+
+Do not break existing routes.
+
+Do not modify the Web Console in this task.
+
+============================================================
+33. WHAT MUST NOT HAPPEN
+============================================================
+
+DO NOT:
+
+- create a giant cyan sphere
+- use a wireframe sphere as the final Earth
+- randomly generate network connections
+- cover the hero text with the globe
+- create a generic SaaS hero
+- add dozens of floating cards
+- turn the page into cyberpunk
+- turn it into a gaming website
+- turn it into a space website
+- create fake live attack statistics
+- leave the globe behind the entire website
+- add more effects just because something looks empty
+
+============================================================
+34. VISUAL QUALITY BAR
+============================================================
+
+Before considering this finished, compare the result mentally against:
+
+A premium intelligence platform.
+
+Not:
+
+A college project landing page.
+
+Not:
+
+A template.
+
+Not:
+
+A gaming UI.
+
+Not:
+
+A generic AI SaaS page.
+
+The result should be something that would make a visitor stop scrolling.
+
+============================================================
+35. PHASE 1 ACCEPTANCE TEST
+============================================================
+
+PHASE 1 PASSES ONLY IF:
+
+[ ] Earth is immediately recognizable.
+
+[ ] Earth is predominantly dark.
+
+[ ] Continents/geographic structure are visible.
+
+[ ] Globe does not overlap hero text.
+
+[ ] 3D scene feels integrated into the hero.
+
+[ ] Initial state is calm and sparse.
+
+[ ] Signals progressively appear.
+
+[ ] Signals are geographically positioned.
+
+[ ] Connections are deterministic.
+
+[ ] Relationships have meaning.
+
+[ ] Phishing → Website → Identity → Authentication can be visually understood.
+
+[ ] Camera moves with scroll.
+
+[ ] Network evolves with scroll.
+
+[ ] Earth gradually becomes secondary to the intelligence network.
+
+[ ] Evidence/risk concepts emerge naturally.
+
+[ ] The hero ends in Signal → Evidence → Risk → Relationship → Response.
+
+[ ] HUD is restrained.
+
+[ ] Mouse interaction is subtle.
+
+[ ] Mobile works.
+
+[ ] Reduced motion works.
+
+[ ] Performance remains acceptable.
+
+[ ] No fake live-threat claims.
+
+[ ] /console still works.
+
+[ ] Existing backend is untouched.
+
+[ ] npm run build succeeds.
+
+============================================================
+36. FINAL INSTRUCTION
+============================================================
+
+DO NOT optimize for:
+
+"more 3D."
+
+DO NOT optimize for:
+
+"more glowing effects."
+
+DO NOT optimize for:
+
+"more cards."
+
+Optimize for:
+
+CINEMATIC STORYTELLING
++
+INFORMATION DESIGN
++
+DEPTH
++
+BELIEVABILITY
++
+INTERACTION
++
+PRODUCT IDENTITY
+
+The final experience should communicate:
+
+ORION sees signals.
+
+ORION connects signals.
+
+ORION understands relationships.
+
+ORION explains risk.
+
+ORION helps drive response.
+
+The user should FEEL that progression while scrolling.
+
+This is Phase 1.
+
+Do not begin Phase 2.
+
+STOP after the hero experience is implemented and validated.
